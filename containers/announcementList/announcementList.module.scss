@@ -1,0 +1,150 @@
+.list {
+  --yellow: #ffc225;
+  --blue: #7995fb;
+  --pink: #ff6aba;
+  padding-top: 30px;
+  padding-bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+
+  @media (max-width: 1320px) {
+    gap: 10px
+  }
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  padding: 0 50px;
+  margin-bottom: 40px;
+
+  @media (max-width: 1139px) {
+    padding: 0 15px;
+    gap: 15px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(1, 1fr);
+    padding: 0 15px;
+  }
+}
+
+.card {
+  position: relative;
+  height: 160px;
+  border-radius: 12px;
+  padding: 20px;
+  overflow: hidden;
+
+  &.yellow {
+    background-color: var(--primary);
+    .title, .button {
+      color: var(--secondary);
+    }
+  }
+
+  &.blue {
+    background-color: var(--secondary);
+    .title, .button {
+      color: var(--white);
+    }
+  }
+
+  &.pink {
+    background-color: var(--red);
+    .title, .button {
+      color: var(--white);
+    }
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+
+    @media (max-width: 1139px) {
+      font-size: 20px;
+    }
+  }
+
+  .button {
+    font-size: 16px;
+    font-weight: 500;
+
+    @media (max-width: 1139px) {
+      font-size: 14px;
+    }
+  }
+
+  .icon {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1;
+  }
+
+  .img {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 576px) {
+    height: 140px;
+    padding: 15px;
+
+    .title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .button {
+      font-size: 13px;
+    }
+
+    .icon {
+      right: 15px;
+      bottom: 15px;
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
+
+.yellow {
+  background-color: var(--yellow);
+  .text {
+    color: var(--yellow);
+  }
+}
+
+.blue {
+  background-color: var(--blue);
+  .text {
+    color: var(--blue);
+  }
+}
+
+.pink {
+  background-color: var(--pink);
+  .text {
+    color: var(--pink);
+  }
+}

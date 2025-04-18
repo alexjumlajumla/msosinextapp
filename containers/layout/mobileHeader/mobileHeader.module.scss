@@ -1,0 +1,84 @@
+.header {
+  top: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  height: 70px;
+  width: 100%; // Add this
+  border-bottom: 1px solid var(--grey);
+  background-color: var(--secondary-bg);
+  overflow-x: hidden; // Add this
+  
+  .navItem {
+    flex: 1; // Change from flex: 1 0 100%
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    column-gap: 30px;
+    padding: 0 15px; // Add padding instead of relying on container
+    max-width: 100%; // Add this
+    
+    .actions {
+      display: flex;
+      align-items: center;
+      column-gap: 20px;
+      margin-left: auto; // Add this to push to right
+      
+      @media (max-width: 576px) {
+        column-gap: 12px; // Increase from 10px
+      }
+      
+      .iconBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px; // Add this for better touch target
+        
+        svg {
+          width: 20px; // Reduce from 22px
+          height: 20px; // Reduce from 22px
+          transition: all 0.2s;
+        }
+      }
+    }
+
+    .brandLogo {
+      display: block;
+      margin-right: auto; // Change from fixed 10px
+      flex-shrink: 0; // Add this
+      
+      svg {
+        fill: var(--dark-blue);
+      }
+    }
+
+    .menuBtn {
+      padding: 10px 17.5px;
+      position: relative;
+      font-size: 0;
+      cursor: pointer;
+      &::after,
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        width: 35px;
+        height: 2px;
+        background-color: var(--black);
+      }
+      &::after {
+        bottom: 5px;
+      }
+      &::before {
+        top: 5px;
+      }
+    }
+  }
+}
+
+.stickyHeader {
+  position: sticky;
+  left: 0; // Add this
+  right: 0; // Add this
+}

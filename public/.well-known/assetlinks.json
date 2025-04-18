@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.msosijumla.customer",
+      "sha256_cert_fingerprints": [
+        "F8:3B:AE:A7:80:D0:03:3D:B7:D4:11:F3:6C:20:9A:B8:BC:67:79:C5:0C:76:86:59:3F:79:D5:2A:EB:9A:CA:3E"
+      ]
+    }
+  }
+]

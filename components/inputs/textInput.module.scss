@@ -1,0 +1,20 @@
+.root {
+  width: 100%;
+  
+  :global(.MuiTextField-root) {
+    width: 100%;
+  }
+
+  .error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+  }
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

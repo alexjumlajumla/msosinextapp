@@ -1,0 +1,53 @@
+.wrapper {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  margin-bottom: 10px;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 30px;
+}
+
+.text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 19px;
+  color: var(--secondary-text);
+}
+
+.space {
+  height: 40px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  .item {
+    flex: 1;
+  }
+}
+
+.resend {
+  color: var(--primary);
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.otpContainer {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}

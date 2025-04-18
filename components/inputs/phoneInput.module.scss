@@ -1,0 +1,95 @@
+.wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 16px;
+  
+  .success {
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  .error {
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  .editButton {
+    color: var(--primary);
+    padding: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.verificationCard {
+  background: var(--secondary-bg);
+  border-radius: 10px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--secondary-text);
+    }
+  }
+
+  .form {
+    margin-bottom: 24px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+
+    button {
+      min-width: 120px;
+    }
+  }
+}
+
+.success-icon {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

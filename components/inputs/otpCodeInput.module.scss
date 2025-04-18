@@ -1,0 +1,47 @@
+.otpWrapper {
+  width: 100%;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.otpContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+
+  div {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+.input {
+  width: 45px !important;
+  height: 45px !important;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--black);
+  background: var(--secondary-bg);
+  text-align: center;
+
+  &:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(251, 198, 24, 0.2);
+  }
+
+  @media (max-width: 576px) {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 16px;
+  }
+}
+
+.separator {
+  width: 8px;
+  display: inline-block;
+}

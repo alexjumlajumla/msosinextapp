@@ -1,0 +1,56 @@
+.marker {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  
+  .pin {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon {
+    position: relative;
+    z-index: 2;
+    font-size: 20px;
+  }
+
+  .pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 1;
+    animation: pulse 2s infinite;
+  }
+}
+
+.shop {
+  .pulse {
+    background: var(--secondary);
+  }
+}
+
+.delivery {
+  .pulse {
+    background: var(--primary);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}

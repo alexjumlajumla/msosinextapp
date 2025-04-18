@@ -1,0 +1,40 @@
+.sellerFormWrapper {
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.addressSection {
+  grid-column: 1 / -1;
+}
+
+.submitButton {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+
+  button {
+    min-width: 120px;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}

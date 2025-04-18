@@ -1,0 +1,111 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 400px;
+  flex: 1 0 50%;
+  @media (max-width: 1139px) {
+    max-width: 100%;
+  }
+  .header {
+    margin-bottom: 10px;
+    .title { margin: 0;
+      margin-bottom: 8px;
+      font-size: 32px;
+      line-height: 39px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--dark-blue);
+      @media (max-width: 576px) {
+        font-size: 27px;
+        line-height: 33px;
+      }
+    }
+    .text {
+      margin: 0;
+      font-size: 15px;
+      line-height: 18px;
+      font-weight: 500;
+      color: var(--dark-blue);
+      a {
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+  .resend {
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .space {
+    padding-top: 50px;
+  }
+  .flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    .item {
+      display: flex;
+      align-items: center;
+      column-gap: 12px;
+      .label,
+      a {
+        font-size: 14px;
+        line-height: 17px;
+        font-weight: 500;
+        color: var(--dark-blue);
+        cursor: pointer;
+      }
+      a {
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+  .action {
+    width: 100%;
+  }
+
+  .otpContainer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+
+    @media (max-width: 768px) {
+      gap: 0.1rem;
+    }
+  }
+
+  .input {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--black);
+    background: var(--secondary-bg);
+    text-align: center;
+    justify-content: center;
+    transition: all 0.2s linear;
+
+    &:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(251, 198, 24, 0.2);
+    }
+
+    @media (max-width: 470px) {
+      width: 35px !important;
+      height: 35px !important;
+      font-size: 16px;
+    }
+  }
+}
