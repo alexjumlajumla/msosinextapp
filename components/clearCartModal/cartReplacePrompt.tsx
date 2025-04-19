@@ -27,7 +27,7 @@ export default function CartReplaceModal({
         <div className={cls.actions}>
           <SecondaryButton onClick={handleClose}>{t("cancel")}</SecondaryButton>
           <PrimaryButton loading={loading} onClick={onSubmit}>
-            {t("clear")}
+            {t("replace")}
           </PrimaryButton>
         </div>
       </div>

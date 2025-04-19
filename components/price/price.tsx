@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useAppSelector } from "hooks/useRedux";
 import { selectCurrency } from "redux/slices/currency";
 import dynamic from "next/dynamic";
+import { numberToPrice } from "utils/numberToPrice";
 
 interface PriceProps {
   number?: number;
@@ -9,7 +10,7 @@ interface PriceProps {
   translation?: boolean;
   old?: boolean;
   minus?: boolean;
-  plus?: boolean;  // Add this line
+  plus?: boolean;
 }
 
 const Price = ({ 
@@ -20,19 +21,24 @@ const Price = ({
   minus = false,
   plus = false
 }: PriceProps) => {
+  const [formattedPrice, setFormattedPrice] = useState('0.00');
   const currency = useAppSelector(selectCurrency);
   const displaySymbol = symbol || currency?.symbol || "$";
 
-  const formattedPrice = useMemo(() => {
-    if (typeof number !== 'number') return '0.00';
+  useEffect(() => {
+    if (typeof number !== 'number') {
+      setFormattedPrice('0.00');
+      return;
+    }
     const value = translation 
       ? (number * (currency?.rate || 1))
       : number;
-    return minus ? (-value).toFixed(2) : value.toFixed(2);
+    const finalValue = minus ? -value : value;
+    setFormattedPrice(numberToPrice(finalValue, 2));
   }, [number, translation, currency?.rate, minus]);
 
   return (
-    <span className={`price-text ${old ? 'old-price' : ''}`}>
+    <span suppressHydrationWarning className={`price-text ${old ? 'old-price' : ''}`}>
       {plus && '+'}{displaySymbol} {formattedPrice}
     </span>
   );
@@ -40,5 +46,6 @@ const Price = ({
 
 // Export as client component
 export default dynamic(() => Promise.resolve(Price), {
-  ssr: false
+  ssr: false,
+  loading: () => <span className="price-text">...</span>
 });

@@ -47,8 +47,10 @@ export default function CartItem({ data }: Props) {
     }
   }
 
-  function handleClearCart() {
+  function handleReplaceCart() {
     dispatch(clearCart());
+    dispatch(addToCart({ ...data, quantity: 1 }));
+    handleClosePrompt();
   }
 
   function checkIsAbleToAddProduct() {
@@ -138,7 +140,7 @@ export default function CartItem({ data }: Props) {
       <CartReplaceModal
         open={openPrompt}
         handleClose={handleClosePrompt}
-        onSubmit={handleClearCart}
+        onSubmit={handleReplaceCart}
       />
     </>
   );
