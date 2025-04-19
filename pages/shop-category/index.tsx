@@ -42,7 +42,7 @@ export default function ShopCategoryPage({}: Props) {
     if (target.isIntersecting && hasNextPage) {
       fetchNextPage();
     }
-  }, []);
+  }, [fetchNextPage, hasNextPage]);
 
   useEffect(() => {
     const option = {
