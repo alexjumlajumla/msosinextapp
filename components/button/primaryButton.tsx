@@ -25,6 +25,7 @@ export default function PrimaryButton({
   loading = false,
   size = "medium",
   id,
+  ...rest
 }: Props) {
   return (
     <button
@@ -35,6 +36,7 @@ export default function PrimaryButton({
       }`}
       disabled={disabled || loading}
       onClick={onClick}
+      {...rest}
     >
       {!loading ? (
         <>

@@ -15,7 +15,11 @@ import {
 const persistConfig = {
   key: "root",
   version: 1,
-  storage,
+  storage: typeof window !== 'undefined' ? storage : {
+    getItem: () => Promise.resolve(null),
+    setItem: () => Promise.resolve(),
+    removeItem: () => Promise.resolve(),
+  },
   whitelist: ["liked", "currency", "search"],
   blacklist: ["cart", "userCart"],
 };
