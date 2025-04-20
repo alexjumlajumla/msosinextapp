@@ -39,6 +39,13 @@ export default function RegisterDetailsForm({ email }: Props) {
   const isUsingCustomPhoneSignIn =
     process.env.NEXT_PUBLIC_CUSTOM_PHONE_SINGUP === "true";
 
+  const handleRegistrationSuccess = (data: any) => {
+    const token = "Bearer" + " " + data.token;
+    setCookie("access_token", token);
+    setUserData(data.user);
+    push("/profile?edit=true");
+  };
+
   const formik = useFormik({
     initialValues: {
       email,
@@ -57,12 +64,7 @@ export default function RegisterDetailsForm({ email }: Props) {
       if (values.email?.includes("@")) {
         authService
           .registerComplete(body)
-          .then(({ data }) => {
-            const token = "Bearer" + " " + data.token;
-            setCookie("access_token", token);
-            setUserData(data.user);
-            push("/");
-          })
+          .then(({ data }) => handleRegistrationSuccess(data))
           .catch((err) => error(t(err.data.message)))
           .finally(() => setSubmitting(false));
       } else {
@@ -73,7 +75,7 @@ export default function RegisterDetailsForm({ email }: Props) {
           profileService
             .update(body)
             .then(() => {
-              push("/");
+              push("/profile?edit=true");
             })
             .catch((err) => error(t(err.data.message)))
             .finally(() => setSubmitting(false));
@@ -81,12 +83,7 @@ export default function RegisterDetailsForm({ email }: Props) {
           body.type = "firebase";
           authService
             .phoneRegisterComplete(body)
-            .then(({ data }) => {
-              const token = "Bearer" + " " + data.token;
-              setCookie("access_token", token);
-              setUserData(data.user);
-              push("/");
-            })
+            .then(({ data }) => handleRegistrationSuccess(data))
             .catch((err) => error(t(err.data.message)))
             .finally(() => setSubmitting(false));
         }

@@ -38,9 +38,17 @@ function reducer(state: IUser, action: AuthAction): IUser | null {
   switch (type) {
     case AuthActionKind.SIGN_IN:
       setCookie("user", JSON.stringify(payload));
+      // Check if profile needs completion
+      const needsProfileCompletion = !payload.phone || !payload.firstname || !payload.lastname;
+      if (needsProfileCompletion) {
+        setCookie("needs_profile_completion", "true");
+      } else {
+        removeCookie("needs_profile_completion");
+      }
       return payload;
     case AuthActionKind.LOGOUT:
       removeCookie("access_token");
+      removeCookie("needs_profile_completion");
       setCookie("user", null);
       return null;
     default:

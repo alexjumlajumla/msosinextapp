@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import cls from "./profile.module.scss";
 import PencilLineIcon from "remixicon-react/PencilLineIcon";
@@ -23,6 +23,8 @@ import dayjs from "dayjs";
 import { useAuth } from "contexts/auth/auth.context";
 import FallbackImage from "components/fallbackImage/fallbackImage";
 import PhoneInputWithVerification from "components/inputs/phoneInputWithVerification";
+import { useRouter } from "next/router";
+import { getCookie, removeCookie } from "utils/session";
 
 const ModalContainer = dynamic(() => import("containers/modal/modal"));
 const MobileDrawer = dynamic(() => import("containers/drawer/mobileDrawer"));
@@ -49,6 +51,8 @@ export default function ProfileContainer({ data }: Props) {
   const isDesktop = useMediaQuery("(min-width:1140px)");
   const [passwordModal, handleOpen, handleClose] = useModal();
   const { setUserData } = useAuth();
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
 
   const isUsingCustomPhoneSignIn =
     process.env.NEXT_PUBLIC_CUSTOM_PHONE_SINGUP === "true";
@@ -65,6 +69,12 @@ export default function ProfileContainer({ data }: Props) {
     onSuccess: (data) => {
       setUserData(data.data);
       success(t("saved"));
+      // Check if all required fields are filled
+      const { firstname, lastname, phone } = data.data;
+      if (firstname && lastname && phone) {
+        removeCookie("needs_profile_completion");
+        router.push("/"); // Redirect to home if profile is complete
+      }
     },
   });
 
@@ -127,6 +137,26 @@ export default function ProfileContainer({ data }: Props) {
       upload(formData);
     }
   }
+
+  useEffect(() => {
+    const needsCompletion = getCookie("needs_profile_completion");
+    const editMode = router.query.edit === "true";
+    
+    if (needsCompletion === "true" || editMode) {
+      setIsEditing(true);
+    }
+  }, [router.query]);
+
+  const handleProfileUpdate = async (values: any) => {
+    try {
+      // Your existing profile update logic here
+      // After successful update:
+      setIsEditing(false);
+      router.replace("/profile"); // Remove the edit query param
+    } catch (err) {
+      error(t("error.400"));
+    }
+  };
 
   return (
     <div className={cls.root}>

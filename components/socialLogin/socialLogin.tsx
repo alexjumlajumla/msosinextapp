@@ -8,7 +8,7 @@ import GoogleFillIcon from "remixicon-react/GoogleFillIcon";
 import { useAuth } from "contexts/auth/auth.context";
 import authService from "services/auth";
 import { useRouter } from "next/router";
-import { setCookie } from "utils/session";
+import { setCookie, getCookie } from "utils/session";
 import nProgress from "nprogress";
 import { error } from "components/alert/toast";
 
@@ -19,6 +19,20 @@ export default function SocialLogin({}: Props) {
   const { googleSignIn, facebookSignIn, appleSignIn, setUserData } = useAuth();
   const { push, query } = useRouter();
   const referralCode: any = query.referral_code;
+
+  const handleSocialLoginSuccess = (data: any) => {
+    const token = data.token_type + " " + data.access_token;
+    setCookie("access_token", token);
+    setUserData(data.user);
+    
+    // Check if profile needs completion
+    const needsCompletion = !data.user.phone || !data.user.firstname || !data.user.lastname;
+    if (needsCompletion) {
+      push("/profile?edit=true");
+    } else {
+      push("/");
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -32,12 +46,7 @@ export default function SocialLogin({}: Props) {
         nProgress.start();
         authService
           .loginByGoogle(body)
-          .then(({ data }) => {
-            const token = data.token_type + " " + data.access_token;
-            setCookie("access_token", token);
-            setUserData(data.user);
-            push("/");
-          })
+          .then(({ data }) => handleSocialLoginSuccess(data))
           .catch((err) => error(err?.data?.message))
           .finally(() => nProgress.done());
       });
@@ -60,12 +69,7 @@ export default function SocialLogin({}: Props) {
         nProgress.start();
         authService
           .loginByFacebook(body)
-          .then(({ data }) => {
-            const token = data.token_type + " " + data.access_token;
-            setCookie("access_token", token);
-            setUserData(data.user);
-            push("/");
-          })
+          .then(({ data }) => handleSocialLoginSuccess(data))
           .catch((err) => error(err?.data?.message))
           .finally(() => nProgress.done());
       });
@@ -89,12 +93,7 @@ export default function SocialLogin({}: Props) {
         nProgress.start();
         authService
           .loginByGoogle(body)
-          .then(({ data }) => {
-            const token = data.token_type + " " + data.access_token;
-            setCookie("access_token", token);
-            setUserData(data.user);
-            push("/");
-          })
+          .then(({ data }) => handleSocialLoginSuccess(data))
           .catch((err) => error(err?.data?.message))
           .finally(() => nProgress.done());
       });

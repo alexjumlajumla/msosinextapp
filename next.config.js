@@ -8,7 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    domains: ['msosijumla.s3.eu-north-1.amazonaws.com'],
+    domains: ['msosijumla.s3.eu-north-1.amazonaws.com', 'lh3.googleusercontent.com'],
     remotePatterns: [
       {
         protocol: process.env.NEXT_PUBLIC_PROTOCOL,
