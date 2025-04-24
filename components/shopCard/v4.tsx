@@ -39,8 +39,10 @@ export default function ShopCard({ data, loading }: Props) {
       );
     }
 
-    // Fallback to manual calculation if location coordinates are available
-    if (!data.location?.latitude || !data.location?.longitude) return null;
+    // Check if we have all required location data
+    if (!userLocation?.latitude || !userLocation?.longitude || !data.location?.latitude || !data.location?.longitude) {
+      return null;
+    }
     
     const distance = getDistance(
       userLocation.latitude,
