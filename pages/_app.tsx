@@ -83,7 +83,18 @@ export default function ExtendedApp({
   const { pathname } = useRouter();
   const isAuthPage = pagesWithoutLayout.some((item) => pathname.includes(item));
   const deviceType = useDeviceType(userAgent);
-  const [queryClient] = useState(() => new QueryClient(config));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            retry: false,
+            staleTime: 300000 // 5 minutes
+          }
+        }
+      })
+  );
   const csEmotionCache =
     appDirection === "rtl" ? clientSideRtlEmotionCache : clientSideEmotionCache;
 

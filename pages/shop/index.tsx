@@ -5,7 +5,7 @@ import informationService from "services/information";
 import createSettings from "utils/createSettings";
 import { getCookie } from "utils/session";
 import { useCallback } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "react-query";
 
 const uiTypes = {
   "1": dynamic(() => import("containers/shops/shopsPage")),
@@ -31,15 +31,16 @@ export default function Shops({ uiType = "1" }: PageProps) {
     fetchNextPage,
     hasNextPage,
     isLoading
-  } = useInfiniteQuery<ShopApiResponse>({
-    queryKey: ['shops'],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam = 1 }) => {
+  } = useInfiniteQuery(
+    'shops',
+    async ({ pageParam = 1 }) => {
       const response = await fetch(`/api/shops?page=${pageParam}`);
       return response.json();
     },
-    getNextPageParam: (lastPage: ShopApiResponse) => lastPage.nextPage ?? undefined,
-  });
+    {
+      getNextPageParam: (lastPage: ShopApiResponse) => lastPage.nextPage ?? undefined,
+    }
+  );
 
   const handleObserver = useCallback((entries: any) => {
     const target = entries[0];
