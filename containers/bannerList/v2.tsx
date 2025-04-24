@@ -29,7 +29,7 @@ export default function BannerList({ data, loading }: Props) {
                   <div className={cls.imgWrapper}>
                     <FallbackImage
                       src={item.img}
-                      alt={item.translation?.title}
+                      alt={item.translation?.title || `Banner ${item.id}`}
                     />
                     <span className={cls.bannerTitle}>
                       {item?.translation?.title}
