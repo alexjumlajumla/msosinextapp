@@ -97,14 +97,35 @@ export default function Homev4() {
   // Parse location string into lat/lng
   const locationParams = useMemo(() => {
     if (!userLocation) return {};
-    const [latitude, longitude] = userLocation.split(',').map(Number);
-    
-    // Debug log
-    console.log('Parsed location params:', { latitude, longitude });
-    
-    if (isNaN(latitude) || isNaN(longitude)) return {};
-    return { latitude, longitude };
+
+    // Handle different location formats
+    try {
+      // If it's already an object with lat/lng
+      if (typeof userLocation === 'object' && userLocation !== null) {
+        const { latitude, longitude } = userLocation;
+        if (typeof latitude === 'number' && typeof longitude === 'number') {
+          return { latitude, longitude };
+        }
+      }
+
+      // If it's a string in "lat,lng" format
+      if (typeof userLocation === 'string') {
+        const [latitude, longitude] = userLocation.split(',').map(Number);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          return { latitude, longitude };
+        }
+      }
+
+      console.warn('Invalid location format:', userLocation);
+      return {};
+    } catch (error) {
+      console.error('Error parsing location:', error);
+      return {};
+    }
   }, [userLocation]);
+
+  // Debug log
+  console.log('Location params:', locationParams);
 
   const { data: shops, isLoading: isShopLoading } = useQuery(
     ["shops", locale, userLocation],
