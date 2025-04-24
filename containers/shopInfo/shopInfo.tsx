@@ -87,7 +87,6 @@ export default function ShopInfo({ data }: Props) {
       {isDesktop ? (
         <ModalContainer open={timeDrawer} onClose={handleCloseTimeDrawer}>
           <DeliveryTimes
-            data={data}
             handleClose={handleCloseTimeDrawer}
             handleChangeDeliverySchedule={handleChangeDeliverySchedule}
           />
@@ -95,7 +94,6 @@ export default function ShopInfo({ data }: Props) {
       ) : (
         <MobileDrawer open={timeDrawer} onClose={handleCloseTimeDrawer}>
           <DeliveryTimes
-            data={data}
             handleClose={handleCloseTimeDrawer}
             handleChangeDeliverySchedule={handleChangeDeliverySchedule}
           />

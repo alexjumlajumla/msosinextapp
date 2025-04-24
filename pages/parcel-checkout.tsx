@@ -7,7 +7,7 @@ import parcelService from "services/parcel";
 import ShopForm from "components/shopForm/shopForm";
 import { ParcelType } from "interfaces/parcel.interface";
 import ParcelForm from "components/parcelForm/parcelForm";
-import ParcelSenderForm from "components/parcelForm/parcelSender";
+import ParcelSenderForm from "components/parcelForm/parcelSenderForm";
 import ParcelReceiverForm from "components/parcelForm/parcelReceiver";
 import ParcelCheckoutContainer from "containers/parcelCheckout/parcelCheckout";
 import ParcelHeaderForm from "components/shopForm/parcelHeaderForm";
@@ -38,7 +38,6 @@ const features:IParcelFeature[][] = [
     img: '/images/parcel/feature4.png',
     title: "delivery.restrictions"
   }],
-
 ]
 
 export default function ParcelCheckout({}: Props) {
@@ -67,21 +66,29 @@ export default function ParcelCheckout({}: Props) {
     <>
       <SEO />
       <ParcelCheckoutContainer>
-        <Grid item xs={12}>
-          <ParcelFeatureList data={features} />
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <ParcelFeatureList data={features} />
+          </Grid>
+          <Grid item xs={12}>
+            <ParcelHeaderForm>
+              <ParcelForm
+                types={formatCategories(types?.data)}
+                payments={formatCategories(payments?.data)}
+              />
+            </ParcelHeaderForm>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ShopForm title={t("sender.details")}>
+              <ParcelSenderForm />
+            </ShopForm>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ShopForm title={t("receiver.details")}>
+              <ParcelReceiverForm />
+            </ShopForm>
+          </Grid>
         </Grid>
-        <ParcelHeaderForm xs={12}>
-          <ParcelForm
-            types={formatCategories(types?.data)}
-            payments={formatCategories(payments?.data)}
-          />
-        </ParcelHeaderForm>
-        <ShopForm title={t("sender.details")} xs={12} md={6}>
-          <ParcelSenderForm />
-        </ShopForm>
-        <ShopForm title={t("receiver.details")} xs={12} md={6}>
-          <ParcelReceiverForm />
-        </ShopForm>
       </ParcelCheckoutContainer>
     </>
   );

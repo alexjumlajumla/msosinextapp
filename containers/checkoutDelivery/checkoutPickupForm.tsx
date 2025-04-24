@@ -204,17 +204,19 @@ export default function CheckoutPickupForm({
       {isDesktop ? (
         <ModalContainer open={timeDrawer} onClose={handleCloseTimeDrawer}>
           <DeliveryTimes
-            data={data}
             handleClose={handleCloseTimeDrawer}
             handleChangeDeliverySchedule={handleChangeDeliverySchedule}
+            formik={formik}
+            onSelectDeliveryTime={(time) => {}}
           />
         </ModalContainer>
       ) : (
         <MobileDrawer open={timeDrawer} onClose={handleCloseTimeDrawer}>
           <DeliveryTimes
-            data={data}
             handleClose={handleCloseTimeDrawer}
             handleChangeDeliverySchedule={handleChangeDeliverySchedule}
+            formik={formik}
+            onSelectDeliveryTime={(time) => {}}
           />
         </MobileDrawer>
       )}

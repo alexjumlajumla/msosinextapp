@@ -35,24 +35,18 @@ export default function ParcelReceiverForm({
   const { t } = useLocale();
   const currency = useAppSelector(selectCurrency);
   const isDesktop = useMediaQuery("(min-width:1140px)");
-  const {
-    username_to,
-    phone_to,
-    address_to,
-    location_to,
-    location_from,
-    type_id,
-    notify,
-    description,
-  } = formik.values;
-  const [addressModal, handleOpenAddressModal, handleCloseAddressModal] =
-    useModal();
-  
+  const [addressModal, handleOpenAddressModal, handleCloseAddressModal] = useModal();
   const {location} = useSettings();
+
   const defaultLocation = {
-    latitude: location?.split(",")[0],
-    longitude: location?.split(",")[1],
-  }
+    latitude: location?.split(",")[0] || "0",
+    longitude: location?.split(",")[1] || "0",
+  };
+
+  // Extract values early to use in useQuery, with safe fallbacks
+  const location_to = formik?.values?.location_to || defaultLocation;
+  const location_from = formik?.values?.location_from || defaultLocation;
+  const type_id = formik?.values?.type_id || '';
 
   const { data: price, isLoading, isError } = useQuery(
     ["calculateParcel", location_from, location_to, type_id, currency],
@@ -71,6 +65,18 @@ export default function ParcelReceiverForm({
       }
     }
   );
+
+  if (!formik?.values) {
+    return null;
+  }
+
+  const {
+    username_to = '',
+    phone_to = '',
+    address_to = '',
+    notify = false,
+    description = '',
+  } = formik.values;
 
   const handleAddToDescription = (value?: string) => {
     const oldDescription = description;

@@ -45,5 +45,25 @@
       background-color: rgba($color: #ff3d00, $alpha: 0.1);
       cursor: default;
     }
+    :global(.MuiGrid-container) {
+      margin-top: 0 !important;
+    }
+    :global(.MuiGrid-item) {
+      padding: 16px !important;
+      @media (max-width: 576px) {
+        padding: 8px !important;
+      }
+    }
+  }
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  .error {
+    text-align: center;
+    padding: 20px;
+    color: var(--dark-blue);
   }
 }

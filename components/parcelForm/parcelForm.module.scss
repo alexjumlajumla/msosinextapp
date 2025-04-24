@@ -125,3 +125,24 @@
   top: 100px;
   right: 0;
 }
+
+.senderDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+
+  .addressInput {
+    cursor: pointer;
+  }
+}
+
+.addressInput {
+  position: relative;
+  
+  :global(.MuiSvgIcon-root) {
+    color: var(--secondary-text);
+    width: 20px;
+    height: 20px;
+  }
+}

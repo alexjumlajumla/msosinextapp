@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import { FormikProps } from "formik";
 import { ParcelFormValues } from "interfaces/parcel.interface";
 import useLocale from "hooks/useLocale";
@@ -7,7 +7,7 @@ import useModal from "hooks/useModal";
 import TextInput from "components/inputs/textInput";
 import DeliveryAddressModal from "components/addressModal/deliveryAddressModal";
 import PencilFillIcon from "remixicon-react/PencilFillIcon";
-import { PickupFromIcon } from "components/icons";
+import cls from "./parcelForm.module.scss";
 
 interface Props {
   formik: FormikProps<ParcelFormValues>;
@@ -26,39 +26,36 @@ export default function ParcelSenderForm({ formik }: Props) {
 
   return (
     <>
-      <Grid item xs={12} md={6}>
-        <div className="sender-details">
-          <h3>{t("sender.details")}</h3>
+      <div className={cls.senderDetails}>
+        <TextInput
+          name="username_from"
+          label={t("full.name")}
+          value={username_from}
+          onChange={formik.handleChange}
+          error={formik.touched.username_from && Boolean(formik.errors.username_from)}
+          helperText={formik.touched.username_from ? formik.errors.username_from : undefined}
+        />
+        <TextInput
+          name="phone_from"
+          label={t("phone")}
+          value={phone_from}
+          onChange={formik.handleChange}
+          error={formik.touched.phone_from && Boolean(formik.errors.phone_from)}
+          helperText={formik.touched.phone_from ? formik.errors.phone_from : undefined}
+        />
+        <div className={cls.addressInput} onClick={handleOpenAddressModal}>
           <TextInput
-            name="username_from"
-            label={t("full.name")}
-            value={username_from}
+            name="address_from"
+            label={t("address")}
+            value={address_from}
             onChange={formik.handleChange}
-            error={formik.touched.username_from && Boolean(formik.errors.username_from)}
-            helperText={formik.touched.username_from ? formik.errors.username_from : undefined}
+            error={formik.touched.address_from && Boolean(formik.errors.address_from)}
+            helperText={formik.touched.address_from ? formik.errors.address_from : undefined}
+            disabled
+            endAdornment={<PencilFillIcon />}
           />
-          <TextInput
-            name="phone_from"
-            label={t("phone")}
-            value={phone_from}
-            onChange={formik.handleChange}
-            error={formik.touched.phone_from && Boolean(formik.errors.phone_from)}
-            helperText={formik.touched.phone_from ? formik.errors.phone_from : undefined}
-          />
-          <div className="address-input" onClick={handleOpenAddressModal}>
-            <TextInput
-              name="address_from"
-              label={t("address")}
-              value={address_from}
-              onChange={formik.handleChange}
-              error={formik.touched.address_from && Boolean(formik.errors.address_from)}
-              helperText={formik.touched.address_from ? formik.errors.address_from : undefined}
-              disabled
-              endAdornment={<PencilFillIcon />}
-            />
-          </div>
         </div>
-      </Grid>
+      </div>
 
       <DeliveryAddressModal
         address={address_from}

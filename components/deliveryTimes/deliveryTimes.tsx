@@ -4,67 +4,49 @@ import RadioInput from "components/inputs/radioInput";
 import cls from "./deliveryTimes.module.scss";
 import PrimaryButton from "components/button/primaryButton";
 import dayjs from "dayjs";
-import { IShop } from "interfaces";
 import SecondaryButton from "components/button/secondaryButton";
 import { WEEK } from "constants/weekdays";
-import getTimeSlots, {
-  minutesToString,
-  stringToMinutes,
-} from "utils/getTimeSlots";
+import getTimeSlots from "utils/getTimeSlots";
 import getWeekDay from "utils/getWeekDay";
-import checkIsDisabledDay from "utils/checkIsDisabledDay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Navigation } from "swiper";
 import { useMediaQuery } from "@mui/material";
+import { FormikProps } from "formik";
 
 type IDeliveryTime = {
   date: string;
   time: string;
 };
 
-type Props = {
-  data?: IShop;
+interface Props {
   handleClose: () => void;
   handleChangeDeliverySchedule: (data: IDeliveryTime) => void;
-};
+  formik?: FormikProps<any>;
+  onSelectDeliveryTime?: (time: string) => void;
+}
 
 export default function DeliveryTimes({
-  data,
   handleChangeDeliverySchedule,
   handleClose,
+  formik,
+  onSelectDeliveryTime,
 }: Props) {
   const { t } = useTranslation();
   const isDesktop = useMediaQuery("(min-width:1140px)");
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [dayIndex, setDayIndex] = useState(0);
   const [list, setList] = useState<string[]>([]);
-  const selectedWeekDay = WEEK[dayjs().add(dayIndex, "day").day()];
-  const workingSchedule = data?.shop_working_days?.find(
-    (item) => item.day === selectedWeekDay,
-  );
 
   const renderTimes = useCallback(() => {
-    let today = dayjs().add(dayIndex, "day");
-    const isToday = today.isSame(dayjs());
-    const weekDay = WEEK[today.day()];
-    const workingSchedule = data?.shop_working_days?.find(
-      (item) => item.day === weekDay,
-    );
-    if (workingSchedule && !checkIsDisabledDay(dayIndex, data)) {
-      const from = workingSchedule.from.replace("-", ":");
-      const to = workingSchedule.to.replace("-", ":");
-      const slots = getTimeSlots(from, to, isToday);
-      setList(slots);
-      setSelectedValue(null);
-    } else {
-      setList([]);
-      setSelectedValue(null);
-    }
-  }, [dayIndex, data]);
+    // Generate time slots from 8 AM to 8 PM
+    const slots = getTimeSlots("08:00", "20:00", dayIndex === 0);
+    setList(slots);
+    setSelectedValue(null);
+  }, [dayIndex]);
 
   useEffect(() => {
     renderTimes();
-  }, [data, renderTimes]);
+  }, [renderTimes]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedValue(event.target.value);
@@ -85,10 +67,8 @@ export default function DeliveryTimes({
     if (!selectedValue) {
       return;
     }
-    const time = renderDeliverySchedule(selectedValue);
     const date = dayjs().add(dayIndex, "day").format("YYYY-MM-DD");
-    handleChangeDeliverySchedule({ time, date });
-    handleClose();
+    handleChangeDeliverySchedule({ time: selectedValue, date });
   };
 
   function renderDay(index: number) {
@@ -98,33 +78,11 @@ export default function DeliveryTimes({
       weekDay: getWeekDay(day),
     };
   }
-  function renderDeliverySchedule(time: string) {
-    let from = stringToMinutes(time);
-    let to = parseInt(String(data?.delivery_time?.to || "0"));
-    if (data?.delivery_time?.type === "hour") {
-      to = parseInt(String(data.delivery_time.to)) * 60;
-    }
-    if (from + to > 1440) {
-      return `${time} - 00:00`;
-    }
-    const deliveryTime = minutesToString(from + to);
-    if (workingSchedule?.to) {
-      const workingTill = workingSchedule.to.replace("-", ":");
-      if (
-        dayjs(`${dayjs().format("YYYY-MM-DD")} ${deliveryTime}`).isAfter(
-          dayjs(`${dayjs().format("YYYY-MM-DD")} ${workingTill}`),
-        )
-      ) {
-        return `${time} - ${workingTill}`;
-      }
-    }
-    return `${time} - ${deliveryTime}`;
-  }
 
   return (
     <div className={cls.wrapper}>
       <div className={cls.header}>
-        <h2 className={cls.title}>{t("time_schedule")}</h2>
+        <h2 className={cls.title}>{t("select.delivery.time")}</h2>
       </div>
       <div className={cls.tabs}>
         <Swiper
@@ -135,7 +93,7 @@ export default function DeliveryTimes({
           className="tab-swiper"
           allowTouchMove={!isDesktop}
         >
-          {WEEK.map((day, idx) => (
+          {WEEK.slice(0, 7).map((day, idx) => (
             <SwiperSlide key={day}>
               <button
                 type="button"
@@ -152,19 +110,14 @@ export default function DeliveryTimes({
         </Swiper>
       </div>
       <div className={cls.body}>
-        {list.map((item, index, array) => (
-          <div
-            key={item}
-            className={cls.row}
-            style={{ display: array[index + 1] ? "flex" : "none" }}
-          >
+        {list.map((item) => (
+          <div key={item} className={cls.row}>
             <RadioInput {...controlProps(item)} />
             <label className={cls.label} htmlFor={item}>
-              <span className={cls.text}>{renderDeliverySchedule(item)}</span>
+              <span className={cls.text}>{item}</span>
             </label>
           </div>
         ))}
-        {list.length === 0 && <div>{t("shop.closed.choose.other.day")}</div>}
       </div>
       <div className={cls.footer}>
         <div className={cls.action}>

@@ -21,13 +21,18 @@ const cartService = {
         timestamp: new Date().toISOString(),
         status: true
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Cart fetch error:', error);
+      // Return a more structured error response
       return { 
         data: { user_carts: [] },
-        message: 'Error fetching cart',
+        message: error.response?.data?.message || 'Error fetching cart',
         timestamp: new Date().toISOString(),
-        status: false
+        status: false,
+        error: {
+          code: error.response?.status,
+          details: error.response?.data
+        }
       };
     }
   },
@@ -41,21 +46,39 @@ const cartService = {
     }),
   insert: async (data: any): Promise<SuccessResponse<CartType>> => {
     try {
-      // Validate required fields
+      // Enhanced validation
+      if (!data) {
+        throw new Error('Cart data is required');
+      }
+      
       if (!data.shop_id) {
         throw new Error('shop_id is required');
       }
+
       if (!data.products || !Array.isArray(data.products) || data.products.length === 0) {
         throw new Error('products array is required and must not be empty');
       }
       
-      // Validate each product
+      // Enhanced product validation
       data.products.forEach((product: any, index: number) => {
+        if (!product) {
+          throw new Error(`Product at index ${index} is invalid`);
+        }
+        
         if (!product.stock_id) {
           throw new Error(`stock_id is required for product at index ${index}`);
         }
-        if (typeof product.quantity !== 'number' || product.quantity <= 0) {
-          throw new Error(`valid quantity is required for product at index ${index}`);
+
+        if (typeof product.quantity !== 'number') {
+          throw new Error(`quantity must be a number for product at index ${index}`);
+        }
+
+        if (product.quantity <= 0) {
+          throw new Error(`quantity must be greater than 0 for product at index ${index}`);
+        }
+
+        if (product.parent_id && typeof product.parent_id !== 'number') {
+          throw new Error(`parent_id must be a number for product at index ${index}`);
         }
       });
 
@@ -72,10 +95,24 @@ const cartService = {
       };
     } catch (error: any) {
       console.error('Cart insert error:', error);
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-      throw error;
+      
+      // Enhanced error handling
+      const errorMessage = error.response?.data?.message || error.message || 'Error inserting cart';
+      const errorResponse: SuccessResponse<CartType> = {
+        data: {
+          items: [],
+          shopId: 0,
+          total_price: 0,
+          user_carts: [],
+          id: 0,
+          shop_id: 0
+        },
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+        status: false
+      };
+
+      throw errorResponse;
     }
   },
   open: (data: any) => request.post(`/dashboard/user/cart/open`, data),

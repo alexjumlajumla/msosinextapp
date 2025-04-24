@@ -16,6 +16,8 @@ import Link from "next/link";
 import { useSettings } from "contexts/settings/settings.context";
 import { Category } from "interfaces";
 import { rotateArrayInChunks } from "utils/array";
+import ParcelCard from "components/parcelCard/v2";
+
 const BrandSection = dynamic(() => import("components/brandSection/brandSection"), {
   ssr: false
 });
@@ -220,7 +222,7 @@ export default function Homev4() {
           <ShopCategoryList data={categories} loading={shopCategoryLoading} />
           <BannerList data={banners?.data} loading={bannerLoading} />
           <BrandSection />
-          <AnnouncementList data={announcements} />
+          {activeParcel && <ParcelCard />}
           {Array.isArray(stories) && stories.length > 0 && (
             <StoryList data={stories} loading={isStoriesLoading} />
           )}
