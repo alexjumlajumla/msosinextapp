@@ -1,0 +1,24 @@
+.wrapper {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background-color: var(--secondary-bg);
+  border-radius: 20px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  svg {
+    color: var(--primary);
+  }
+
+  span {
+    color: var(--secondary-text);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+  }
+} 

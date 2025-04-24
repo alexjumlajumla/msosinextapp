@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { IShop } from "interfaces";
 import cls from "./v4.module.scss";
 import Link from "next/link";
@@ -10,8 +10,8 @@ import getShortTimeType from "utils/getShortTimeType";
 import Price from "components/price/price";
 import useShopWorkingSchedule from "hooks/useShopWorkingSchedule";
 import VerifiedComponent from "components/verifiedComponent/verifiedComponent";
-import { getDistance } from "utils/getDistance";
 import PinDistanceLineIcon from "remixicon-react/PinDistanceLineIcon";
+import { getDistance } from "utils/getDistance";
 import useUserLocation from "hooks/useUserLocation";
 
 type Props = {
@@ -22,16 +22,46 @@ type Props = {
 export default function ShopCard({ data, loading }: Props) {
   const { t } = useLocale();
   const { isShopClosed } = useShopWorkingSchedule(data);
-  const location = useUserLocation();
+  const userLocation = useUserLocation();
 
-  const distance = useMemo(() => {
-    return getDistance(
-      Number(location?.latitude),
-      Number(location?.longitude),
-      Number(data?.location?.latitude),
-      Number(data?.location?.longitude)
+  const renderDistance = () => {
+    // If API provides distance directly, use it
+    if (typeof data.distance === 'number') {
+      const text = data.distance < 1 
+        ? `${(data.distance * 1000).toFixed(0)}m`
+        : `${data.distance.toFixed(1)}km`;
+
+      return (
+        <div className={cls.badge}>
+          <PinDistanceLineIcon size={16} />
+          <span>{text}</span>
+        </div>
+      );
+    }
+
+    // Fallback to manual calculation if location coordinates are available
+    if (!data.location?.latitude || !data.location?.longitude) return null;
+    
+    const distance = getDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      Number(data.location.latitude),
+      Number(data.location.longitude)
     );
-  }, [location, data?.location]);
+
+    if (!distance) return null;
+    
+    const text = distance < 1 
+      ? `${(distance * 1000).toFixed(0)}m`
+      : `${distance.toFixed(1)}km`;
+
+    return (
+      <div className={cls.badge}>
+        <PinDistanceLineIcon size={16} />
+        <span>{text}</span>
+      </div>
+    );
+  };
 
   return (
     <Link
@@ -50,6 +80,7 @@ export default function ShopCard({ data, loading }: Props) {
           alt={data.translation?.title}
           sizes="400px"
         />
+        {renderDistance()}
       </div>
       <div className={cls.body}>
         <div className={cls.content}>
@@ -61,25 +92,23 @@ export default function ShopCard({ data, loading }: Props) {
             <span className={cls.text}>
               <Price number={data.price} /> {t("delivery.fee")}
             </span>
-
             <span className={cls.dot} />
             <span className={cls.text}>
               {data.delivery_time?.from}-{data.delivery_time?.to}{" "}
               {t(getShortTimeType(data.delivery_time?.type))}
             </span>
           </div>
+          {typeof data.min_amount === 'number' && data.min_amount > 0 && (
+            <div className={cls.minAmount}>
+              {t("min.amount")}: <Price number={data.min_amount} />
+            </div>
+          )}
         </div>
         <div className={cls.rating}>{data.rating_avg?.toFixed(1) || 0}</div>
       </div>
       <div className={cls.footer}>
         <ShopBadges data={data} />
       </div>
-      {distance > 0 && (
-        <div className={cls.distancePill}>
-          <PinDistanceLineIcon size={16} />
-          <span>{distance.toFixed(1)} km</span>
-        </div>
-      )}
     </Link>
   );
 }

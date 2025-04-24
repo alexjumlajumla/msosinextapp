@@ -71,31 +71,39 @@ export interface IShopTranslation extends Translation {
 
 export interface IShop {
   id: number;
-  translation: IShopTranslation;
-  logo_img?: string;
-  background_img?: string;
-  mark?: string;
   uuid?: string;
+  user_id?: number;
+  tax?: number;
+  rate_id?: number;
+  price?: number;
+  price_per_km?: number;
+  visibility?: boolean;
+  verify?: number;
+  background_img?: string;
+  logo_img?: string;
+  min_amount?: number;
+  open?: boolean;
+  translation?: Translation;
+  bonus?: any;
+  rating_avg?: number;
+  delivery_time?: {
+    from: number;
+    to: number;
+    type: string;
+  };
+  distance?: number;
   products_count?: number;
-  delivery_time?: ShopDeliveryTime;
   location?: Location;
   shop_closed_date?: ShopClosedDate[];
   shop_working_days?: ShopWorkingDays[];
-  bonus?: Bonus;
-  price: number;
-  price_per_km?: number;
   phone?: string;
   shop_payments?: ShopPayment[];
-  rating_avg?: number;
-  is_recommended?: boolean;
   discounts_count?: number;
   type?: "restaurant" | "shop";
   discount?: any;
   reviews_count?: number;
   tags?: IShopTag[];
-  open: boolean;
-  verify: Number;
-  min_amount?: number;
+  mark?: string;
 }
 
 export interface IBookingShop {

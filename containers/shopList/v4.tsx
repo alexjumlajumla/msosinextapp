@@ -11,9 +11,18 @@ type Props = {
   loading?: boolean;
   title?: string;
   link?: string;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 };
 
-export default function ShopList({ shops, loading, title, link }: Props) {
+export default function ShopList({ 
+  shops, 
+  loading, 
+  title, 
+  link,
+  hasNextPage,
+  isFetchingNextPage 
+}: Props) {
   const isDesktop = useMediaQuery("(min-width:1140px)");
   const { t } = useTranslation();
 

@@ -10,13 +10,25 @@ const cartService = {
     request.post(`/dashboard/user/cart`, data),
   get: async ({ currency_id }: { currency_id?: number }) => {
     try {
+      console.log('Fetching cart with currency:', currency_id);
       const response = await request.get('/dashboard/user/cart', {
         params: { currency_id }
       });
-      return response;
+      console.log('Cart fetch response:', response.data);
+      return {
+        data: response.data,
+        message: 'Success',
+        timestamp: new Date().toISOString(),
+        status: true
+      };
     } catch (error) {
       console.error('Cart fetch error:', error);
-      return { data: { user_carts: [] } };
+      return { 
+        data: { user_carts: [] },
+        message: 'Error fetching cart',
+        timestamp: new Date().toISOString(),
+        status: false
+      };
     }
   },
   deleteCartProducts: (data: any) =>
@@ -27,8 +39,45 @@ const cartService = {
     request.delete(`/dashboard/user/cart/delete`, {
       data,
     }),
-  insert: (data: any): Promise<SuccessResponse<CartType>> =>
-    request.post(`/dashboard/user/cart/insert-product`, data),
+  insert: async (data: any): Promise<SuccessResponse<CartType>> => {
+    try {
+      // Validate required fields
+      if (!data.shop_id) {
+        throw new Error('shop_id is required');
+      }
+      if (!data.products || !Array.isArray(data.products) || data.products.length === 0) {
+        throw new Error('products array is required and must not be empty');
+      }
+      
+      // Validate each product
+      data.products.forEach((product: any, index: number) => {
+        if (!product.stock_id) {
+          throw new Error(`stock_id is required for product at index ${index}`);
+        }
+        if (typeof product.quantity !== 'number' || product.quantity <= 0) {
+          throw new Error(`valid quantity is required for product at index ${index}`);
+        }
+      });
+
+      console.log('Inserting cart with data:', JSON.stringify(data, null, 2));
+      
+      const response = await request.post(`/dashboard/user/cart/insert-product`, data);
+      console.log('Cart insert response:', JSON.stringify(response.data, null, 2));
+      
+      return {
+        data: response.data,
+        message: 'Success',
+        timestamp: new Date().toISOString(),
+        status: true
+      };
+    } catch (error: any) {
+      console.error('Cart insert error:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
   open: (data: any) => request.post(`/dashboard/user/cart/open`, data),
   setGroup: (id: number) =>
     request.post(`/dashboard/user/cart/set-group/${id}`),

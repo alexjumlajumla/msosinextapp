@@ -15,6 +15,10 @@ import Loader from "components/loader/loader";
 import Link from "next/link";
 import { useSettings } from "contexts/settings/settings.context";
 import { Category } from "interfaces";
+import { rotateArrayInChunks } from "utils/array";
+const BrandSection = dynamic(() => import("components/brandSection/brandSection"), {
+  ssr: false
+});
 
 const announcements = [
   {
@@ -52,9 +56,10 @@ export default function Homev4() {
   const loader = useRef(null);
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
-  const location = useUserLocation();
+  const { location: userLocation } = useSettings();
   const { settings } = useSettings();
   const activeParcel = Number(settings?.active_parcel) === 1;
+
   const { data: shopCategoryListResult, isLoading: shopCategoryLoading } = useQuery(
     ["shopcategory", locale],
     () => categoryService.getAllShopCategories({ perPage: 100, type: 'shop' }),
@@ -76,17 +81,58 @@ export default function Homev4() {
     () => bannerService.getAll(),
   );
   const { data: stories, isLoading: isStoriesLoading } = useQuery(
-    ["stories", locale, location],
-    () => storyService.getAll({ address: location }),
+    ["stories", locale, userLocation],
+    () => storyService.getAll({ address: userLocation }),
   );
   const { data: ads, isLoading: adListLoading } = useQuery(
-    ["ads", locale, location],
-    () => bannerService.getAllAds({ perPage: 6, address: location }),
+    ["ads", locale, userLocation],
+    () => bannerService.getAllAds({ perPage: 6, address: userLocation }),
   );
+
+  // Debug log
+  console.log('User location from settings:', userLocation);
+
+  // Parse location string into lat/lng
+  const locationParams = useMemo(() => {
+    if (!userLocation) return {};
+    const [latitude, longitude] = userLocation.split(',').map(Number);
+    
+    // Debug log
+    console.log('Parsed location params:', { latitude, longitude });
+    
+    if (isNaN(latitude) || isNaN(longitude)) return {};
+    return { latitude, longitude };
+  }, [userLocation]);
+
   const { data: shops, isLoading: isShopLoading } = useQuery(
-    ["shops", locale, location],
-    () => shopService.getRecommended({ open: 1, address: location }),
+    ["shops", locale, userLocation],
+    () => {
+      const params = {
+        open: 1,
+        ...locationParams,
+        include: 'location,distance'
+      };
+      console.log('Shop query params:', params);
+      return shopService.getRecommended(params);
+    },
+    {
+      onSuccess: (data) => {
+        console.log('Recommended shops response:', data);
+      }
+    }
   );
+
+  const { data: topRatedShops, isLoading: isTopRatedLoading } = useQuery(
+    ["topRatedShops", locale, userLocation],
+    () => {
+      const params = {
+        open: 1,
+        ...locationParams,
+      };
+      return shopService.getTopRated(params);
+    }
+  );
+
   const {
     data: nearbyShops,
     isLoading: nearByShopsLoading,
@@ -94,15 +140,20 @@ export default function Homev4() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    ["nearbyshops", locale, location],
-    ({ pageParam = 1 }) =>
-      shopService.getAllShops(
-        qs.stringify({
-          page: pageParam,
-          address: location,
-          open: 1,
-        }),
-      ),
+    ["nearbyshops", locale, userLocation],
+    ({ pageParam = 1 }) => {
+      const params = {
+        page: pageParam,
+        ...locationParams,
+        open: 1,
+        include: 'location,distance',
+        sort: 'asc',
+        column: 'distance',
+        perPage: 24 // Increase page size to ensure better sorting
+      };
+      console.log('Nearby shops query params:', params);
+      return shopService.getAllShops(qs.stringify(params));
+    },
     {
       getNextPageParam: (lastPage: any) => {
         if (lastPage.meta.current_page < lastPage.meta.last_page) {
@@ -110,9 +161,29 @@ export default function Homev4() {
         }
         return undefined;
       },
+      onSuccess: (data) => {
+        console.log('Nearby shops response:', data);
+      }
     },
   );
-  const nearbyShopList = nearbyShops?.pages?.flatMap((item) => item.data) || [];
+
+  // Flatten and ensure precise distance-based sorting
+  const nearbyShopList = useMemo(() => {
+    const shops = nearbyShops?.pages?.flatMap((item) => item.data) || [];
+    
+    // Convert all distances to meters for consistent comparison
+    return shops.sort((a, b) => {
+      const distanceA = typeof a.distance === 'number' ? a.distance : Infinity;
+      const distanceB = typeof b.distance === 'number' ? b.distance : Infinity;
+      
+      // Convert to meters if in kilometers (assuming distances > 1 are in km)
+      const metersA = distanceA > 1 ? distanceA * 1000 : distanceA * 1000;
+      const metersB = distanceB > 1 ? distanceB * 1000 : distanceB * 1000;
+      
+      return metersA - metersB;
+    });
+  }, [nearbyShops?.pages]);
+
   const handleObserver = useCallback((entries: any) => {
     const target = entries[0];
     if (target.isIntersecting && hasNextPage) {
@@ -129,75 +200,62 @@ export default function Homev4() {
     const observer = new IntersectionObserver(handleObserver, option);
     if (loader.current) observer.observe(loader.current);
   }, [handleObserver]);
+
+  // Process recommended shops with rotation
+  const processedRecommendedShops = useMemo(() => {
+    if (!shops?.data) return [];
+    return rotateArrayInChunks(shops.data);
+  }, [shops?.data]);
+
+  // Process top rated shops with rotation
+  const processedTopRatedShops = useMemo(() => {
+    if (!topRatedShops?.data) return [];
+    return rotateArrayInChunks(topRatedShops.data);
+  }, [topRatedShops?.data]);
+
   return (
-    <section className={cls.container}>
-      {/* Categories - Important for navigation */}
-      <ShopCategoryList
-        data={categories}
-        loading={shopCategoryLoading}
-      />
-
-      {/* Main Banner - Attention grabbing */}
-      <BannerList data={banners?.data || []} loading={bannerLoading} />
-
-      {/* Stories - Social proof and engagement */}
-      {stories?.length !== 0 && (
-        <div className={`${cls.sectionHeader} container`}>
-          <h2 className={cls.sectionTitle}>{t("stories.widget")}</h2>
-        </div>
-      )}
-      <StoryList data={stories} loading={isStoriesLoading} />
-
-      {/* Trending Shops - Popular items */}
-      <div className={`${cls.sectionHeader} container`}>
-        <h2 className={cls.sectionTitle}>{t("trending")}</h2>
-        <Link className={cls.link} href="/shop?filter=recomended">
-          {t("see.all")}
-        </Link>
-      </div>
-      <ShopList
-        shops={shops?.data}
-        loading={isShopLoading}
-      />
-
-      {/* Promotions/Ads Section */}
-      {ads?.data?.length !== 0 && (
-        <div className={`${cls.sectionHeader} container`}>
-          <h2 className={cls.sectionTitle}>{t("explore")}</h2>
-          <Link className={cls.link} href="ads">
-            {t("see.all")}
-          </Link>
-        </div>
-      )}
-      <AdList data={ads?.data} loading={adListLoading} />
-
-      {/* Delivery Features - If active */}
-      {activeParcel && (
-        <>
-          <div className={`${cls.sectionHeader} container`}>
-            <h2 className={cls.sectionTitle}>{t("especially.for.you")}</h2>
-            <p className={cls.sectionSubTitle}>
-              {t("especially.for.you.description")}
-            </p>
-          </div>
+    <div className={cls.container}>
+      <div className={cls.wrapper}>
+        <div className={cls.header}>
+          <ShopCategoryList data={categories} loading={shopCategoryLoading} />
+          <BannerList data={banners?.data} loading={bannerLoading} />
+          <BrandSection />
           <AnnouncementList data={announcements} />
-        </>
-      )}
-
-      {/* Nearby Shops - Location based */}
-      <div className={`${cls.sectionHeader} container`}>
-        <h2 className={cls.sectionTitle}>{t("popular.near.you")}</h2>
-        <Link className={cls.link} href="/shop?filter=popular">
-          {t("see.all")}
-        </Link>
+          {Array.isArray(stories) && stories.length > 0 && (
+            <StoryList data={stories} loading={isStoriesLoading} />
+          )}
+          {shops?.data && shops.data.length > 0 && (
+            <ShopList 
+              title={t("recommended")} 
+              shops={shops.data} 
+              loading={isShopLoading}
+              link="/shop?filter=recommended" 
+            />
+          )}
+          {ads?.data && ads.data.length > 0 && (
+            <AdList data={ads.data} loading={adListLoading} />
+          )}
+          {topRatedShops?.data && topRatedShops.data.length > 0 && (
+            <ShopList
+              title={t("top.rated")}
+              shops={topRatedShops.data}
+              loading={isTopRatedLoading}
+              link="/shop?sort=desc&column=rating_avg"
+            />
+          )}
+          {Array.isArray(nearbyShopList) && nearbyShopList.length > 0 && (
+            <ShopList
+              title={t("nearby.shops")}
+              shops={nearbyShopList}
+              loading={nearByShopsLoading}
+              link="/shop?sort=asc&column=distance"
+            />
+          )}
+        </div>
       </div>
-      <ShopList
-        shops={nearbyShopList}
-        loading={nearByShopsLoading && !isFetchingNextPage}
-      />
-
-      {isFetchingNextPage && <Loader />}
-      <div ref={loader} />
-    </section>
+      <div ref={loader} style={{ height: 50 }}>
+        {isFetchingNextPage && <Loader />}
+      </div>
+    </div>
   );
 }

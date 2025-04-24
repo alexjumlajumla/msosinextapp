@@ -10,6 +10,7 @@ import getShortTimeType from "utils/getShortTimeType";
 import Price from "components/price/price";
 import useShopWorkingSchedule from "hooks/useShopWorkingSchedule";
 import VerifiedComponent from "components/verifiedComponent/verifiedComponent";
+import DistancePill from "components/distancePill/distancePill";
 
 type Props = {
   data: IShop;
@@ -37,6 +38,7 @@ export default function ShopCard({ data }: Props) {
           sizes="400px"
         />
         <ShopBadges data={data} />
+        <DistancePill distance={data.distance} />
       </div>
       <div className={cls.body}>
         <div className={cls.main}>

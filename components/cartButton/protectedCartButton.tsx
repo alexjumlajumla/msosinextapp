@@ -17,9 +17,7 @@ import { selectCurrency } from "redux/slices/currency";
 import shopService from "services/shop";
 import { useSettings } from "contexts/settings/settings.context";
 
-type Props = {};
-
-export default function ProtectedCartButton({}: Props) {
+export default function ProtectedCartButton() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const cart = useAppSelector(selectUserCart);
@@ -35,9 +33,23 @@ export default function ProtectedCartButton({}: Props) {
     ["cart", currency?.id],
     () => cartService.get({ currency_id: currency?.id }),
     {
-      onSuccess: (data) => dispatch(updateUserCart(data.data)),
-      onError: () => dispatch(clearUserCart()),
+      onSuccess: (data) => {
+        console.log('Cart fetch success:', data);
+        if (data.data?.user_carts?.length) {
+          dispatch(updateUserCart(data.data));
+          dispatch(updateIndicatorState(true));
+        } else {
+          dispatch(clearUserCart());
+          dispatch(updateIndicatorState(false));
+        }
+      },
+      onError: (error) => {
+        console.error('Cart fetch error:', error);
+        dispatch(clearUserCart());
+        dispatch(updateIndicatorState(false));
+      },
       retry: false,
+      refetchInterval: 5000, // Refresh every 5 seconds
     }
   );
 
@@ -54,13 +66,17 @@ export default function ProtectedCartButton({}: Props) {
       }),
     {
       onError: () => dispatch(updateIndicatorState(false)),
-      onSuccess: () => dispatch(updateIndicatorState(true)),
+      onSuccess: () => {
+        if (cartItems.length > 0) {
+          dispatch(updateIndicatorState(true));
+        }
+      },
       enabled: !!cartItems.length && !!location && !!shopId,
     }
   );
 
-  // Only render cart button if we have items, shop ID and the cart is visible
-  if (cartItems.length && cartIndicatorVisible && shopId) {
+  // Only render cart button if we have items and the cart is visible
+  if (cartItems.length > 0 && cartIndicatorVisible && shopId) {
     return (
       <div className={cls.cartBtnWrapper}>
         <Link href={`/shop/${shopId}`} className={cls.cartBtn}>
@@ -76,5 +92,5 @@ export default function ProtectedCartButton({}: Props) {
     );
   }
 
-  return <div></div>;
+  return null;
 }

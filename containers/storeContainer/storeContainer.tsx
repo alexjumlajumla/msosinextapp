@@ -6,6 +6,7 @@ import { Member, ShopProvider } from "contexts/shop/shop.provider";
 import CartContainer from "containers/cart/cartContainer";
 import VerticalNavbar from "containers/verticalNavbar/verticalNavbar";
 import { useMediaQuery } from "@mui/material";
+import { RestaurantProvider } from "contexts/restaurant/restaurant.provider";
 
 const MobileCart = dynamic(() => import("containers/mobileCart/mobileCart"));
 
@@ -25,18 +26,20 @@ export default function StoreContainer({
   const isDesktop = useMediaQuery("(min-width:1140px)");
 
   return (
-    <ShopProvider memberState={memberState} data={data}>
-      <div className={`${cls.container} store`}>
-        <main className={cls.main}>
-          {React.Children.map(children, (child) => {
-            return React.cloneElement(child, { data, categories });
-          })}
-        </main>
-        <div className={cls.cart}>
-          {!!data && <CartContainer shop={data} />}
+    <RestaurantProvider restaurantState={data}>
+      <ShopProvider memberState={memberState} data={data}>
+        <div className={`${cls.container} store`}>
+          <main className={cls.main}>
+            {React.Children.map(children, (child) => {
+              return React.cloneElement(child, { data, categories });
+            })}
+          </main>
+          <div className={cls.cart}>
+            {!!data && <CartContainer shop={data} />}
+          </div>
+          {!!data && !isDesktop && <MobileCart shop={data} />}
         </div>
-        {!!data && !isDesktop && <MobileCart shop={data} />}
-      </div>
-    </ShopProvider>
+      </ShopProvider>
+    </RestaurantProvider>
   );
 }

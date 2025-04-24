@@ -9,6 +9,7 @@ import useLocale from "hooks/useLocale";
 import StarFillIcon from "remixicon-react/StarFillIcon";
 import ShopCardDeliveryInfo from "components/shopCardDeliveryInfo/shopCardDeliveryInfo";
 import VerifiedComponent from "components/verifiedComponent/verifiedComponent";
+import DistancePill from "components/distancePill/distancePill";
 
 type Props = {
   data: IShop;
@@ -32,6 +33,7 @@ export default function ShopCard({ data }: Props) {
         />
         <ShopBadges data={data} />
         <ShopCardDeliveryInfo data={data.delivery_time} />
+        <DistancePill distance={data.distance} />
       </div>
       <div className={cls.body}>
         <h3 className={cls.title}>

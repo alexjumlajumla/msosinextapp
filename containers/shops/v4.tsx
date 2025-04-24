@@ -15,7 +15,7 @@ const ShopList = dynamic(() => import("containers/shopList/v4"));
 const FooterMenu = dynamic(() => import("containers/footerMenu/footerMenu"));
 
 const PER_PAGE = 12;
-type FilterType = "popular" | "recomended";
+type FilterType = "popular" | "recomended" | "new" | "top-rated" | "wholesale";
 
 export default function ShopsPage() {
   const { t, locale } = useLocale();
@@ -25,28 +25,75 @@ export default function ShopsPage() {
   const { query } = useRouter();
   const filter = query?.filter as FilterType;
 
+  const queryParams = useMemo(() => {
+    const params: Record<string, any> = {
+      page: 1,
+      perPage: PER_PAGE,
+      address: location,
+      currency_id: currency?.id,
+      include: 'location,distance',
+      verify: query?.verify,
+      search: query?.search,
+      category_id: query?.category,
+      type: query?.type,
+    };
+
+    // Add additional filters based on the filter type
+    switch (filter) {
+      case "popular":
+        params.open = 1;
+        break;
+      case "new":
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        params.created_from = sevenDaysAgo.toISOString().split('T')[0];
+        params.sort = 'desc';
+        params.column = 'created_at';
+        break;
+      case "top-rated":
+        params.sort = 'desc';
+        params.column = 'rating_avg';
+        params.rating_from = 4.5;
+        break;
+      case "wholesale":
+        params.has_min_amount = 1;
+        params.sort = 'asc';
+        params.column = 'min_amount';
+        break;
+    }
+
+    return params;
+  }, [filter, location, currency?.id, query]);
+
   const {
-    data: popularShops,
+    data: shopData,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
   } = useInfiniteQuery(
-    ["popularShopsPaginate", locale, location, currency, filter, query?.verify],
-    ({ pageParam = 1 }) =>
-      shopService.getAll(
-        qs.stringify({
-          page: pageParam,
-          perPage: PER_PAGE,
-          address: location,
-          open: filter === "popular" ? 1 : undefined,
-          currency_id: currency?.id,
-          verify: query?.verify,
-        })
-      ),
+    ["shopsPaginate", locale, location, currency, filter, query],
+    ({ pageParam = 1 }) => {
+      const params = {
+        ...queryParams,
+        page: pageParam,
+      };
+      
+      switch (filter) {
+        case "recomended":
+          return shopService.getRecommended(params);
+        case "new":
+          return shopService.getNewShops(params);
+        case "top-rated":
+          return shopService.getTopRated(params);
+        case "wholesale":
+          return shopService.getWholesaleShops(params);
+        default:
+          return shopService.getAll(qs.stringify(params));
+      }
+    },
     {
-      enabled: filter !== "recomended",
       getNextPageParam: (lastPage: any) => {
         if (lastPage.meta.current_page < lastPage.meta.last_page) {
           return lastPage.meta.current_page + 1;
@@ -56,29 +103,9 @@ export default function ShopsPage() {
     }
   );
 
-  const { data: recommendedShops, isLoading: isRecomendedLoading } = useQuery(
-    ["recommendedShops", locale, location, currency, filter],
-    () =>
-      shopService.getRecommended({
-        address: location,
-        currency_id: currency?.id,
-      }),
-    {
-      enabled: filter === "recomended",
-    }
-  );
-
   const shops = useMemo(() => {
-    switch (filter) {
-      case "popular":
-        return popularShops?.pages?.flatMap((item) => item.data) || [];
-      case "recomended":
-        return recommendedShops?.data || [];
-
-      default:
-        return popularShops?.pages?.flatMap((item) => item.data) || [];
-    }
-  }, [popularShops, filter, recommendedShops]);
+    return shopData?.pages?.flatMap((item) => item.data) || [];
+  }, [shopData]);
 
   const handleObserver = useCallback(
     (entries: any) => {
@@ -110,6 +137,12 @@ export default function ShopsPage() {
         return t("popular.near.you");
       case "recomended":
         return t("daily.offers");
+      case "new":
+        return t("new.shops");
+      case "top-rated":
+        return t("top.rated.shops");
+      case "wholesale":
+        return t("wholesale.shops");
       default:
         return t("all");
     }
@@ -120,15 +153,12 @@ export default function ShopsPage() {
       <ShopList
         title={getTitle(filter)}
         shops={shops}
-        loading={(isLoading && !isFetchingNextPage) || isRecomendedLoading}
+        loading={isLoading && !isFetchingNextPage}
       />
       {isFetchingNextPage && <Loader />}
       <div ref={loader} />
 
-      {!shops.length &&
-        !isLoading &&
-        !recommendedShops?.data?.length &&
-        !isRecomendedLoading && <Empty text={t("no.shops")} />}
+      {!shops.length && !isLoading && <Empty text={t("no.shops")} />}
       <FooterMenu />
     </div>
   );

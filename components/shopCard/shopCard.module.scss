@@ -39,6 +39,27 @@
         filter: brightness(110%);
       }
     }
+    .distancePill {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background-color: var(--yellow);
+      border-radius: 20px;
+      z-index: 2;
+      svg {
+        fill: var(--dark-blue);
+      }
+      span {
+        color: var(--dark-blue);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1;
+      }
+    }
   }
   .body {
     position: relative;
@@ -130,6 +151,12 @@
       .greenDot {
         right: 0;
         left: auto;
+      }
+    }
+    .header {
+      .distancePill {
+        right: auto;
+        left: 12px;
       }
     }
   }

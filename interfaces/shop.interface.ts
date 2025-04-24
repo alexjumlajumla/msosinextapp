@@ -21,4 +21,12 @@ export interface ShopFormType {
     [key: string]: string;
   };
   location: string;
+  distance?: number;
+}
+
+export interface ShopWorkingDay {
+  disabled: boolean;
+  from: string;
+  to: string;
+  day: string;
 }

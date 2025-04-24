@@ -18,7 +18,8 @@ import ProductUI from "./productUI";
 import AddonsForm from "components/extrasForm/addonsForm";
 import { useTranslation } from "react-i18next";
 import { error, info } from "components/alert/toast";
-import { useShop } from "contexts/shop/shop.context";
+import { useRestaurant } from 'contexts/restaurant/restaurant.context';
+import { ShopWorkingDays } from 'interfaces';
 
 type Props = {
   handleClose: () => void;
@@ -54,7 +55,7 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
   const [openPrompt, handleOpenPrompt, handleClosePrompt] = useModal();
   const { query } = useRouter();
   const shopId = Number(query.id);
-  const { isOpen, isShopClosed } = useShop();
+  const { restaurant } = useRestaurant();
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
 
   const { data } = useQuery(
@@ -142,11 +143,26 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
     setCounter((prev) => prev - 1);
   }
 
-  function handleAddToCart() {
-    if (!isOpen || isShopClosed) {
-      info(t("shop.closed"));
+  const handleAddToCart = async () => {
+    if (!restaurant) {
+      error(t('shop.not.found'));
       return;
     }
+
+    if (!restaurant.shop_working_days?.length) {
+      error(t('shop.working.days.not.found'));
+      return;
+    }
+
+    const isShopClosed = restaurant.shop_working_days.find(
+      (item: ShopWorkingDays) => item.day === new Date().getDay().toString()
+    )?.disabled;
+
+    if (isShopClosed) {
+      error(t('shop.closed'));
+      return;
+    }
+
     if (!checkIsAbleToAddProduct()) {
       handleOpenPrompt();
       return;
@@ -164,26 +180,49 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
   }
 
   function storeCart() {
-    const defaultAddons =
-      showExtras.stock.addons?.filter((item) => !!item.product) || [];
+    if (!shopId) {
+      error(t('shop.id.required'));
+      return;
+    }
+
+    if (!currency?.id) {
+      error(t('currency.required'));
+      return;
+    }
+
+    if (!showExtras.stock.id) {
+      error(t('stock.not.found'));
+      return;
+    }
+
+    const defaultAddons = showExtras.stock.addons?.filter((item) => !!item.product) || [];
     const products: {
       stock_id?: number;
       quantity?: number;
       parent_id: number;
     }[] = [];
+
     defaultAddons.forEach((item) => {
-      if (getAddonQuantity(item.product?.stock?.id) !== 0) {
+      const quantity = getAddonQuantity(item.product?.stock?.id);
+      if (quantity && quantity > 0) {
         products.push({
           stock_id: item.product?.stock?.id,
-          quantity: getAddonQuantity(item.product?.stock?.id),
+          quantity: quantity,
           parent_id: showExtras.stock.id,
         });
       }
     });
+
+    // Validate main product quantity
+    if (counter <= 0) {
+      error(t('quantity.must.be.greater.than.zero'));
+      return;
+    }
+
     const body = {
       shop_id: shopId,
-      currency_id: currency?.id,
-      rate: currency?.rate,
+      currency_id: currency.id,
+      rate: currency.rate,
       products: [
         {
           stock_id: showExtras.stock.id,
@@ -192,6 +231,8 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
         ...products,
       ],
     };
+
+    console.log('Sending cart data:', body);
     mutate(body);
   }
 
