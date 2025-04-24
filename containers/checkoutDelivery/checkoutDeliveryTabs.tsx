@@ -19,15 +19,18 @@ export default function CheckoutDeliveryTabs({ data, formik }: Props) {
   const handleChangeTypes = (key: string) => {
     formik.setFieldValue("delivery_type", key);
     if (key === "pickup") {
-      formik.setFieldValue("location", data.location);
-      formik.setFieldValue("address.address", data.translation.address);
+      formik.setFieldValue("location", data?.location || {
+        latitude: "",
+        longitude: ""
+      });
+      formik.setFieldValue("address.address", data.translation?.title || "");
     } else {
       const userLocation = {
-        latitude: latlng?.split(",")[0],
-        longitude: latlng?.split(",")[1],
+        latitude: latlng?.split(",")[0] || "",
+        longitude: latlng?.split(",")[1] || "",
       };
       formik.setFieldValue("location", userLocation);
-      formik.setFieldValue("address.address", address);
+      formik.setFieldValue("address.address", address || "");
     }
   };
 

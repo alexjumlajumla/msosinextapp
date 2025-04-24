@@ -104,6 +104,7 @@ export interface IShop {
   reviews_count?: number;
   tags?: IShopTag[];
   mark?: string;
+  is_recommended?: boolean;
 }
 
 export interface IBookingShop {
@@ -142,8 +143,8 @@ export interface Bonus {
 }
 
 export interface ShopDeliveryTime {
-  to: string;
-  from: string;
+  to: string | number;
+  from: string | number;
   type: string;
 }
 

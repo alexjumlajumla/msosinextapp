@@ -100,9 +100,9 @@ export default function DeliveryTimes({
   }
   function renderDeliverySchedule(time: string) {
     let from = stringToMinutes(time);
-    let to = parseInt(data?.delivery_time?.to || "0");
+    let to = parseInt(String(data?.delivery_time?.to || "0"));
     if (data?.delivery_time?.type === "hour") {
-      to = parseInt(data.delivery_time.to) * 60;
+      to = parseInt(String(data.delivery_time.to)) * 60;
     }
     if (from + to > 1440) {
       return `${time} - 00:00`;

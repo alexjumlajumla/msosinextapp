@@ -11,6 +11,7 @@ import storyService from "services/story";
 import bannerService from "services/banner";
 import useUserLocation from "hooks/useUserLocation";
 import qs from "qs";
+import { IBookingShop, IShop } from "interfaces";
 
 const Empty = dynamic(() => import("components/empty/empty"));
 const Loader = dynamic(() => import("components/loader/loader"));
@@ -112,7 +113,17 @@ export default function Homev1() {
       },
     }
   );
-  const restaurants = data?.pages?.flatMap((item) => item.data) || [];
+  const restaurants = data?.pages?.flatMap((item) => 
+    item.data.map((shop: IBookingShop) => ({
+      ...shop,
+      verify: Number(shop.verify),
+      delivery_time: shop.delivery_time ? {
+        from: Number(shop.delivery_time.from),
+        to: Number(shop.delivery_time.to),
+        type: shop.delivery_time.type
+      } : undefined
+    }))
+  ) || [];
 
   const { data: recommendedShops, isLoading: recommendedLoading } = useQuery(
     ["recommendedShops", locale, location],

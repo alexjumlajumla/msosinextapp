@@ -243,7 +243,7 @@ export default function CheckoutContainer({
             <div className={cls.header}>
               <ShopLogoBackground data={data} />
               <div className={cls.shop}>
-                <h1 className={cls.title}>{data?.translation.title}</h1>
+                <h1 className={cls.title}>{data?.translation?.title}</h1>
                 <p className={cls.text}>
                   {data?.bonus ? (
                     <BonusCaption data={data?.bonus} />

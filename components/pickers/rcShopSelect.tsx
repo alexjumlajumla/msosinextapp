@@ -10,7 +10,7 @@ import Loader from "components/loader/loader";
 import ShopResultWithoutLinkItem from "components/searchResultItem/shopResultWithoutLink";
 import { Skeleton } from "@mui/material";
 import qs from "qs";
-import { IShop } from "interfaces";
+import { IShop, IBookingShop } from "interfaces";
 import useUserLocation from "hooks/useUserLocation";
 
 type Props = {
@@ -20,6 +20,24 @@ type Props = {
   error?: boolean;
   hasSection?: number
 };
+
+const transformShopToBookingShop = (shop: IShop): IBookingShop => ({
+  ...shop,
+  translation: shop.translation || {
+    title: "",
+    description: "",
+    address: "",
+    locale: "en",
+  },
+  delivery_time: shop.delivery_time ? {
+    ...shop.delivery_time,
+    from: String(shop.delivery_time.from),
+    to: String(shop.delivery_time.to),
+  } : undefined,
+  price: shop.price || 0,
+  open: Boolean(shop.open),
+  verify: Number(shop.verify || 0),
+});
 
 export default function RcShopSelect({ label, value, onChange, error, hasSection }: Props) {
   const { t, i18n } = useTranslation();
@@ -126,9 +144,18 @@ export default function RcShopSelect({ label, value, onChange, error, hasSection
                 {shopList.map((item) => (
                   <ShopResultWithoutLinkItem
                     key={item.id}
-                    data={item}
-                    onClickItem={(data) => {
-                      onChange(data);
+                    data={transformShopToBookingShop(item)}
+                    onClickItem={(bookingShop) => {
+                      const shop: IShop = {
+                        ...bookingShop,
+                        verify: Number(bookingShop.verify),
+                        delivery_time: bookingShop.delivery_time ? {
+                          from: Number(bookingShop.delivery_time.from),
+                          to: Number(bookingShop.delivery_time.to),
+                          type: bookingShop.delivery_time.type
+                        } : undefined
+                      };
+                      onChange(shop);
                       handleClose();
                     }}
                   />

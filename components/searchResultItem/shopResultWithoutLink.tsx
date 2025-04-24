@@ -1,51 +1,48 @@
-import React from "react";
-import cls from "./searchResultItem.module.scss";
 import { IBookingShop, IShop } from "interfaces";
+import React from "react";
+import cls from "./shopResultWithoutLink.module.scss";
 import ShopLogoBackground from "components/shopLogoBackground/shopLogoBackground";
-import useLocale from "hooks/useLocale";
-import StarSmileFillIcon from "remixicon-react/StarSmileFillIcon";
+import { useTranslation } from "react-i18next";
+import getShortTimeType from "utils/getShortTimeType";
 import useShopBookingSchedule from "hooks/useShopBookingSchedule";
 
-type Props = {
+interface Props {
   data: IBookingShop;
-  onClickItem?: (value: IShop) => void;
-};
+  onClickItem?: (data: IBookingShop) => void;
+}
 
-export default function ShopResultWithoutLinkItem({
-  data,
-  onClickItem,
-}: Props) {
-  const { t } = useLocale();
+const convertToShop = (bookingShop: IBookingShop): IShop => ({
+  ...bookingShop,
+  verify: Number(bookingShop.verify),
+  delivery_time: bookingShop.delivery_time ? {
+    from: Number(bookingShop.delivery_time.from),
+    to: Number(bookingShop.delivery_time.to),
+    type: bookingShop.delivery_time.type
+  } : undefined
+});
+
+export default function ShopResultWithoutLinkItem({ data, onClickItem }: Props) {
+  const { t } = useTranslation();
   const { workingSchedule, isShopClosed } = useShopBookingSchedule(data);
+
+  const handleClick = () => {
+    if (!onClickItem) return;
+    onClickItem(data);
+  };
+
   return (
-    <div className={cls.row}>
+    <div className={cls.wrapper}>
       <button
         className={cls.flex}
-        onClick={() => !!onClickItem && onClickItem(data)}
+        onClick={handleClick}
         style={{ width: "100%" }}
       >
-        <ShopLogoBackground data={data} />
-        <div className={cls.shopNaming}>
-          {/* <p className={cls.desc}>{data.translation?.description}</p> */}
-          <div className={cls.titleRateContainer}>
-            <h4 className={cls.shopTitle}>{data.translation?.title}</h4>
-            <div className={`${cls.rating}`}>
-              <StarSmileFillIcon />
-              <p className={cls.text}>
-                <span className={cls.semiBold}>
-                  {data?.rating_avg?.toFixed(1) || 0}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <p className={cls.workTime}>
-            <span>{t("working.time")}: </span>
-            <span className={cls.bold}>
-              {isShopClosed
-                ? t("closed")
-                : `${workingSchedule.from} — ${workingSchedule.to}`}
-            </span>
+        <ShopLogoBackground data={convertToShop(data)} />
+        <div className={cls.naming}>
+          <h3 className={cls.title}>{data.translation?.title}</h3>
+          <p className={cls.text}>
+            {data.delivery_time?.from} - {data.delivery_time?.to}{" "}
+            {t(getShortTimeType(data.delivery_time?.type))}
           </p>
         </div>
       </button>

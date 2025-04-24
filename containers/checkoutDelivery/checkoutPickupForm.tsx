@@ -196,7 +196,7 @@ export default function CheckoutPickupForm({
         anchorEl={anchorEl}
         onClose={handleCloseTimePopover}
         weekDay={isToday ? t("today") : isTomorrow ? t("tomorrow") : day}
-        time={data?.delivery_time?.to || "0"}
+        time={String(data?.delivery_time?.to || "0")}
         handleOpenDrawer={handleOpenTimeDrawer}
         formik={formik}
         timeType={data.delivery_time?.type || "minute"}

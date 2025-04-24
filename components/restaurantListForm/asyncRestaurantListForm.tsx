@@ -8,6 +8,7 @@ import useLocale from "hooks/useLocale";
 import shopService from "services/shop";
 import qs from "qs";
 import Image from "next/image";
+import { IShop, IShopTranslation } from "interfaces";
 
 interface Props {
   handleSubmit: (id: string) => void;
@@ -45,11 +46,18 @@ export default function AsyncBranchListForm({ handleSubmit, branchId }: Props) {
                   <RadioInput {...controlProps(String(item.id))} />
                   <label className={cls.label} htmlFor={String(item.id)}>
                     <div className={cls.content}>
-                      <Image src={item.logo_img || ""} alt={item.translation.title} width={50} height={50} className={cls.img} />
+                      <Image 
+                        src={item.logo_img || ""} 
+                        alt={item.translation?.title || String(item.id)} 
+                        width={50} 
+                        height={50} 
+                        className={cls.img} 
+                      />
                       <div className={cls.main}>
-
-                    <span className={cls.text}>{item.translation?.title}</span>
-                    <div className={cls.muted}>{item.translation?.address}</div>
+                        <span className={cls.text}>{item.translation?.title}</span>
+                        <span className={cls.subtext}>
+                          {(item.translation as IShopTranslation)?.address || t("no.address")}
+                        </span>
                       </div>
                     </div>
                   </label>

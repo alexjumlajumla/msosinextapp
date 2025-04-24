@@ -32,7 +32,7 @@ export default function CartServices({ data }: Props) {
           </div>
         </div>
         <div className={cls.price}>
-          <Price number={data?.price * Number(currency?.rate)} />
+          <Price number={(data?.price || 0) * Number(currency?.rate || 1)} />
         </div>
       </div>
 
