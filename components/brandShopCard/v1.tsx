@@ -18,7 +18,7 @@ export default function BrandShopCard({ data }: Props) {
       <div className={cls.card}>
         <Image
           className={cls.img}
-          alt={data.translation?.title}
+          alt={data.translation?.title || data.id.toString()}
           src={data.logo_img || ""}
           width={100}
           height={100}
