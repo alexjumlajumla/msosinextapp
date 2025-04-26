@@ -24,12 +24,16 @@ export default function ShopCard({ data }: Props) {
   const { t } = useLocale();
   const { isShopClosed } = useShopWorkingSchedule(data);
 
-  const formatDistance = (distance?: number) => {
-    if (typeof distance !== 'number') return null;
-    if (distance < 1) {
-      return `${(distance * 1000).toFixed(0)}m`;
+  const formatDistance = (distance?: number | string) => {
+    if (distance === undefined || distance === null) return null;
+    
+    const numericDistance = typeof distance === 'string' ? parseFloat(distance) : distance;
+    if (isNaN(numericDistance)) return null;
+    
+    if (numericDistance < 1) {
+      return `${(numericDistance * 1000).toFixed(0)}m`;
     }
-    return `${distance.toFixed(1)}km`;
+    return `${numericDistance.toFixed(1)}km`;
   };
 
   const distanceText = formatDistance(data.distance);
@@ -51,7 +55,7 @@ export default function ShopCard({ data }: Props) {
           alt={data.translation?.title}
           sizes="400px"
         />
-        <DistancePill distance={data.distance} />
+        <DistancePill distance={typeof data.distance === 'string' ? parseFloat(data.distance) : data.distance} />
       </div>
       <div className={cls.body}>
         <div className={cls.shopLogo}>
