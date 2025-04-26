@@ -2,7 +2,11 @@ import { IShop } from "interfaces";
 import React from "react";
 import cls from "./shopInfoDetails.module.scss";
 import Map from "components/map/map";
-import { RiCloseFill, RiFileCopyLine, RiStoreLine, RiPhoneLine, RiMapPinLine } from "@remixicon/react";
+import CloseFillIcon from "remixicon-react/CloseFillIcon";
+import FileCopyLineIcon from "remixicon-react/FileCopyLineIcon";
+import StoreLineIcon from "remixicon-react/StoreLineIcon";
+import PhoneLineIcon from "remixicon-react/PhoneLineIcon";
+import MapPinLineIcon from "remixicon-react/MapPinLineIcon";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -26,18 +30,18 @@ export default function ShopInfoDetails({ data, onClose }: Props) {
   return (
     <div className={cls.container}>
       <button className={cls.closeBtn} onClick={onClose}>
-        <RiCloseFill />
+        <CloseFillIcon />
       </button>
       
       <div className={cls.header}>
-        <RiStoreLine className={cls.headerIcon} />
+        <StoreLineIcon className={cls.headerIcon} />
         <h2 className={cls.headerTitle}>{t("shop.info")}</h2>
       </div>
 
       <div className={cls.wrapper}>
         <div className={cls.item}>
           <div className={cls.itemHeader}>
-            <RiStoreLine className={cls.icon} />
+            <StoreLineIcon className={cls.icon} />
             <strong>{t("name")}</strong>
           </div>
           <span className={cls.itemContent}>{data?.translation?.title}</span>
@@ -45,7 +49,7 @@ export default function ShopInfoDetails({ data, onClose }: Props) {
 
         <div className={cls.item}>
           <div className={cls.itemHeader}>
-            <RiPhoneLine className={cls.icon} />
+            <PhoneLineIcon className={cls.icon} />
             <strong>{t("phone")}</strong>
           </div>
           <span className={cls.itemContent}>{data?.phone}</span>
@@ -53,13 +57,13 @@ export default function ShopInfoDetails({ data, onClose }: Props) {
 
         <div className={cls.item}>
           <div className={cls.itemHeader}>
-            <RiMapPinLine className={cls.icon} />
+            <MapPinLineIcon className={cls.icon} />
             <strong>{t("address")}</strong>
           </div>
           <div className={cls.addressRow}>
             <span className={cls.itemContent}>{data?.translation?.title}</span>
             <button className={cls.copyBtn} onClick={copyToClipBoard}>
-              <RiFileCopyLine />
+              <FileCopyLineIcon />
               <span>{t("copy")}</span>
             </button>
           </div>

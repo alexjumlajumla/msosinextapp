@@ -82,9 +82,9 @@ export interface IShop {
   background_img?: string;
   logo_img?: string;
   banner?: string;
-  min_amount?: number;
+  min_amount?: number | string;
   open?: boolean;
-  translation?: Translation;
+  translation?: IShopTranslation;
   bonus?: any;
   rating_avg?: number;
   delivery_time?: {
@@ -92,9 +92,12 @@ export interface IShop {
     to: number;
     type: string;
   };
-  distance?: number;
+  distance?: number | string;
   products_count?: number;
-  location?: Location;
+  location?: {
+    latitude: string | number;
+    longitude: string | number;
+  };
   shop_closed_date?: ShopClosedDate[];
   shop_working_days?: ShopWorkingDays[];
   phone?: string;
