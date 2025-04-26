@@ -129,8 +129,9 @@ export default function CheckoutPayment({
 
   function handleOrderCreate() {
     console.log("checkout");
+    const shopMinAmount = typeof shop?.min_amount === 'string' ? parseFloat(shop.min_amount) : (shop?.min_amount || 1);
     const localShopMinPrice =
-      ((currency?.rate || 1) * (shop?.min_amount || 1)) /
+      ((currency?.rate || 1) * shopMinAmount) /
       (defaultCurrency?.rate || 1);
     if (!user?.phone && settings?.before_order_phone_required === "1") {
       onPhoneVerify();
