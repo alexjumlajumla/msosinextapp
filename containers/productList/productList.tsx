@@ -14,7 +14,7 @@ type Props = {
   uuid?: string;
 };
 
-export default function ProductList({ loading, products = [] }: Props) { // Add default empty array
+export default function ProductList({ loading, products = [], title, uuid }: Props) {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -24,32 +24,43 @@ export default function ProductList({ loading, products = [] }: Props) { // Add 
   };
 
   return (
-    <div className={styles.wrapper}>
-      {loading ? (
-        Array.from({ length: 8 }).map((_, idx) => (
-          <Skeleton
-            key={`product-skeleton-${idx}`}
-            variant="rectangular"
-            className={styles.skeleton}
-            width={280}
-            height={320}
-          />
-        ))
-      ) : (
-        products.map((product) => (
-          product && ( // Add null check
-            <div 
-              key={`product-${product.id || Math.random()}`} 
-              className={styles.productCard}
-            >
-              <ProductCard 
-                data={product} 
-                handleOpen={(e) => handleOpen(e, product)} 
-              />
-            </div>
-          )
-        ))
+    <div 
+      className={styles.wrapper} 
+      id={uuid} 
+      data-section={uuid}
+    >
+      {title && (
+        <div className={styles.header}>
+          <h2 className={styles.title}>{title}</h2>
+        </div>
       )}
+      <div className={styles.productGrid}>
+        {loading ? (
+          Array.from({ length: 8 }).map((_, idx) => (
+            <Skeleton
+              key={`product-skeleton-${idx}`}
+              variant="rectangular"
+              className={styles.skeleton}
+              width={280}
+              height={320}
+            />
+          ))
+        ) : (
+          products.map((product) => (
+            product && (
+              <div 
+                key={`product-${product.id || Math.random()}`} 
+                className={styles.productCard}
+              >
+                <ProductCard 
+                  data={product} 
+                  handleOpen={(e) => handleOpen(e, product)} 
+                />
+              </div>
+            )
+          ))
+        )}
+      </div>
     </div>
   );
 }

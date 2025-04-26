@@ -17,15 +17,28 @@ import { selectCurrency } from "redux/slices/currency";
 import dynamic from "next/dynamic";
 import useModal from "hooks/useModal";
 import { useMediaQuery } from "@mui/material";
+import useShopWorkingSchedule from "hooks/useShopWorkingSchedule";
+import { error } from "components/alert/toast";
+import { IShop } from "interfaces";
 
-const ModalContainer = dynamic(() => import("containers/modal/modal"));
-const MobileDrawer = dynamic(() => import("containers/drawer/mobileDrawer"));
-const EditPhone = dynamic(() => import("components/editPhone/editPhone"));
+const ModalContainer = dynamic(() => import("containers/modal/modal"), {
+  ssr: false
+});
+const MobileDrawer = dynamic(() => import("containers/drawer/mobileDrawer"), {
+  ssr: false
+});
+const EditPhone = dynamic(() => import("components/editPhone/editPhone"), {
+  ssr: false
+});
 
-type Props = {};
+type Props = {
+  initialData: {
+    shop: IShop;
+  };
+};
 
-export default function Checkout({}: Props) {
-  const { i18n } = useTranslation();
+export default function Checkout({ initialData }: Props) {
+  const { i18n, t } = useTranslation();
   const locale = i18n.language;
   const { query, back } = useRouter();
   const shopId = Number(query.id);
@@ -34,9 +47,23 @@ export default function Checkout({}: Props) {
   const [phoneModal, handleOpenPhone, handleClosePhone] = useModal();
   const isDesktop = useMediaQuery("(min-width:1140px)");
 
-  const { data } = useQuery(["shop", shopId, locale], () =>
-    shopService.getById(shopId),
+  const { data } = useQuery(
+    ["shop", shopId, locale],
+    () => shopService.getById(shopId),
+    {
+      initialData: { data: initialData.shop },
+      enabled: !!shopId && !!locale
+    }
   );
+
+  const { isShopClosed } = useShopWorkingSchedule(data?.data);
+
+  React.useEffect(() => {
+    if (isShopClosed) {
+      error(t("shop.closed"));
+      back();
+    }
+  }, [isShopClosed, back, t]);
 
   const { isLoading } = useQuery(
     ["cart", currency?.id],
@@ -52,8 +79,13 @@ export default function Checkout({}: Props) {
       },
       staleTime: 0,
       refetchOnWindowFocus: true,
-    },
+      enabled: !!currency?.id
+    }
   );
+
+  if (isShopClosed) {
+    return null;
+  }
 
   return (
     <>
@@ -78,18 +110,46 @@ export default function Checkout({}: Props) {
 export const getServerSideProps: GetServerSideProps = async ({
   query,
   req,
+  res
 }) => {
   const queryClient = new QueryClient();
   const shopId = Number(query.id);
   const locale = getLanguage(req.cookies?.locale);
 
-  await queryClient.prefetchQuery(["shop", shopId, locale], () =>
-    shopService.getById(shopId),
-  );
+  try {
+    const shopData = await shopService.getById(shopId);
+    
+    // Check if shop is closed on server side
+    const today = new Date().getDay().toString();
+    const isShopClosed = !shopData.data.open || shopData.data.shop_working_days?.find(
+      (item) => item.day === today
+    )?.disabled;
 
-  return {
-    props: {
-      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-    },
-  };
+    if (isShopClosed) {
+      return {
+        redirect: {
+          destination: `/shop/${shopId}`,
+          permanent: false,
+        },
+      };
+    }
+
+    await queryClient.prefetchQuery(["shop", shopId, locale], () => shopData);
+
+    return {
+      props: {
+        initialData: {
+          shop: shopData.data
+        },
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+      },
+    };
+  } catch (error) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
 };

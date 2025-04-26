@@ -16,7 +16,10 @@ const shopService = {
     request.get(`/rest/shops/recommended`, { 
       params: {
         ...params,
-        include: 'location,distance',
+        include: 'location,distance,translations,delivery_time,price,rating',
+        type: 'shop',
+        perPage: 4,
+        open: 1,
         random: Math.random()
       }
     }),

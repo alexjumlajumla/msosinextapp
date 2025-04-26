@@ -81,6 +81,7 @@ export interface IShop {
   verify?: number;
   background_img?: string;
   logo_img?: string;
+  banner?: string;
   min_amount?: number;
   open?: boolean;
   translation?: Translation;

@@ -5,6 +5,7 @@ import TimeLineIcon from "remixicon-react/TimeLineIcon";
 import RunFillIcon from "remixicon-react/RunFillIcon";
 import StarSmileFillIcon from "remixicon-react/StarSmileFillIcon";
 import CouponLineIcon from "remixicon-react/CouponLineIcon";
+import CalendarCheckLineIcon from "remixicon-react/CalendarCheckLineIcon";
 import ShopLogoBackground from "components/shopLogoBackground/shopLogoBackground";
 import { useMediaQuery } from "@mui/material";
 import dynamic from "next/dynamic";
@@ -24,6 +25,10 @@ import { useSettings } from "contexts/settings/settings.context";
 import getShortTimeType from "utils/getShortTimeType";
 import useLocale from "hooks/useLocale";
 import VerifiedComponent from "components/verifiedComponent/verifiedComponent";
+import useModal from "hooks/useModal";
+import { selectOrder, setDeliveryDate } from "redux/slices/order";
+import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 const JoinGroupContainer = dynamic(
   () => import("containers/joinGroupContainer/joinGroupContainer"),
@@ -38,13 +43,16 @@ const GroupOrderButton = dynamic(
 const SupportBtn = dynamic(() => import("components/favoriteBtn/supportBtn"));
 const ShopShare = dynamic(() => import("components/shopShare/shopShare"));
 const ShopInfo = dynamic(() => import("containers/shopInfo/shopInfo"));
+const DeliveryTimes = dynamic(() => import("components/deliveryTimes/deliveryTimes"));
+const ModalContainer = dynamic(() => import("containers/modal/modal"));
+const MobileDrawer = dynamic(() => import("containers/drawer/mobileDrawer"));
 
 type Props = {
   data?: IShop;
 };
 
 export default function ShopHeader({ data }: Props) {
-  const { t } = useLocale();
+  const { t } = useTranslation();
   const isDesktop = useMediaQuery("(min-width:1140px)");
   const dispatch = useAppDispatch();
   const favoriteRestaurants = useAppSelector(selectLikedRestaurants);
@@ -53,6 +61,8 @@ export default function ShopHeader({ data }: Props) {
   const currency = useAppSelector(selectCurrency);
   const { settings } = useSettings();
   const isGroupOrderActive = settings.group_order == 1;
+  const [timeDrawer, handleOpenTimeDrawer, handleCloseTimeDrawer] = useModal();
+  const { order } = useAppSelector(selectOrder);
 
   const isLiked = useMemo(
     () => !!favoriteRestaurants.find((el) => el.uuid === data?.uuid),
@@ -69,8 +79,29 @@ export default function ShopHeader({ data }: Props) {
     }
   }
 
+  const handleChangeDeliverySchedule = ({
+    date,
+    time,
+  }: {
+    date: string;
+    time: string;
+  }) => {
+    dispatch(
+      setDeliveryDate({
+        delivery_time: time,
+        delivery_date: date,
+        shop_id: data?.id,
+      })
+    );
+    handleCloseTimeDrawer();
+  };
+
+  const headerStyle = {
+    '--shop-banner': data?.background_img ? `url(${data.background_img})` : 'none'
+  } as React.CSSProperties;
+
   return (
-    <div className={cls.header}>
+    <div className={cls.header} style={headerStyle}>
       <div className="shop-container">
         <div className={cls.row}>
           <div className={cls.shopBrand}>
@@ -162,11 +193,13 @@ export default function ShopHeader({ data }: Props) {
               </p>
             </div>
           </div>
-          {isGroupOrderActive && (
-            <div className={cls.actions}>
-              <GroupOrderButton />
-            </div>
-          )}
+          <div className={cls.actions}>
+            <button className={cls.preOrderBtn} onClick={handleOpenTimeDrawer}>
+              <CalendarCheckLineIcon />
+              <span>{t("pre.order")}</span>
+            </button>
+            {isGroupOrderActive && <GroupOrderButton />}
+          </div>
         </div>
         {!!data?.bonus && (
           <div className={cls.flex}>
@@ -178,6 +211,26 @@ export default function ShopHeader({ data }: Props) {
         )}
 
         {query.g ? <JoinGroupContainer /> : ""}
+
+        {isDesktop ? (
+          <ModalContainer open={timeDrawer} onClose={handleCloseTimeDrawer}>
+            <DeliveryTimes
+              handleClose={handleCloseTimeDrawer}
+              handleChangeDeliverySchedule={handleChangeDeliverySchedule}
+              formik={undefined}
+              onSelectDeliveryTime={undefined}
+            />
+          </ModalContainer>
+        ) : (
+          <MobileDrawer open={timeDrawer} onClose={handleCloseTimeDrawer}>
+            <DeliveryTimes
+              handleClose={handleCloseTimeDrawer}
+              handleChangeDeliverySchedule={handleChangeDeliverySchedule}
+              formik={undefined}
+              onSelectDeliveryTime={undefined}
+            />
+          </MobileDrawer>
+        )}
       </div>
     </div>
   );

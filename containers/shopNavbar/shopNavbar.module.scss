@@ -1,13 +1,29 @@
 .container {
   position: sticky;
   top: 70px;
-  z-index: 10;
-  background-color: var(--secondary-bg);
+  z-index: 9999;
+  background-color: rgba(var(--secondary-bg-rgb), 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   padding: 12px 30px 0 50px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  pointer-events: all;
+  transform: translateZ(0);
+  will-change: transform;
+
+  [data-theme="dark"] & {
+    background-color: rgba(45, 45, 60, 0.95);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
   .wrapper {
     display: flex;
     justify-content: space-between;
     width: 100%;
+    position: relative;
+    z-index: inherit;
+    
     .navbar {
       display: flex;
       height: 56px;
@@ -15,8 +31,13 @@
       padding: 0;
       column-gap: 30px;
       list-style-type: none;
+      position: relative;
+      z-index: inherit;
+      
       .navItem {
         position: relative;
+        z-index: inherit;
+        
         .navLink {
           display: block;
           height: 100%;
@@ -25,6 +46,13 @@
           line-height: 21px;
           color: var(--secondary-text);
           transition: all 0.2s;
+          position: relative;
+          z-index: inherit;
+          cursor: pointer;
+          pointer-events: auto;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+          
           &::after {
             content: "";
             position: absolute;
@@ -35,11 +63,15 @@
             background-color: transparent;
             transition: all 0.2s;
           }
-          &:hover,
+          &:hover {
+            &::after {
+              background-color: var(--primary);
+            }
+          }
           &.active {
             color: var(--black);
             &::after {
-              background-color: var(--black);
+              background-color: var(--primary);
             }
           }
         }

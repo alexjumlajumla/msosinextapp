@@ -14,6 +14,7 @@
   "number.of.foods": "{{count}} foods",
   "popular": "Popular",
   "nearby.shops": "Nearby shops",
+  "new.shops": "New shops",
   "top.rated": "Top rated",
   "foods": "Foods",
   "orders": "Orders",
@@ -324,7 +325,7 @@
   "parcel.details": "Parcel details",
   "receiver.details": "Receiver details",
   "home": "Home",
-  "stage": "Stage",
+  "stage": "Floor",
   "room": "Room",
   "active.parcels": "Active parcels",
   "parcel.history": "Parcel history",
@@ -358,5 +359,7 @@
   "delivery.with.in": "Delivery with in",
   "shop.banner.title": "Something hot. Something tasty.",
   "shop.banner.desc": "Top ratings and consistently great service",
-  "order.now": "Order now"
+  "order.now": "Order now",
+  "select.delivery.date": "Select delivery date",
+  "shop.info": "Shop Information"
 }

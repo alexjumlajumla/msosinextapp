@@ -22,18 +22,18 @@ const BpIcon = styled("span")(() => ({
 }));
 
 const BpCheckedIcon = styled(BpIcon)({
-  backgroundColor: "#83ea00",
+  backgroundColor: "var(--primary)",
   backgroundImage:
     "linear-gradient(180deg,hsla(0,0%,100%,.1),hsla(0,0%,100%,0))",
   "&:before": {
     display: "block",
     width: 18,
     height: 18,
-    backgroundImage: "radial-gradient(#232B2F,#232B2F 28%,transparent 32%)",
+    backgroundImage: "radial-gradient(#fff,#fff 28%,transparent 32%)",
     content: '""',
   },
   "input:hover ~ &": {
-    backgroundColor: "#83ea00",
+    backgroundColor: "var(--primary-hover)",
   },
 });
 

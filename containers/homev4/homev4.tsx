@@ -145,14 +145,16 @@ export default function Homev4() {
     }
   );
 
-  const { data: topRatedShops, isLoading: isTopRatedLoading } = useQuery(
-    ["topRatedShops", locale, userLocation],
+  const { data: newShops, isLoading: isNewShopsLoading } = useQuery(
+    ["newShops", locale, userLocation],
     () => {
       const params = {
-        open: 1,
         ...locationParams,
+        include: 'location,distance',
+        order_by: 'new',
+        perPage: 8,
       };
-      return shopService.getTopRated(params);
+      return shopService.getAll(qs.stringify(params));
     }
   );
 
@@ -170,8 +172,8 @@ export default function Homev4() {
         ...locationParams,
         open: 1,
         include: 'location,distance',
-        sort: 'asc',
-        column: 'distance',
+        sort: 'desc',
+        column: 'created_at',
         perPage: 24 // Increase page size to ensure better sorting
       };
       console.log('Nearby shops query params:', params);
@@ -190,21 +192,9 @@ export default function Homev4() {
     },
   );
 
-  // Flatten and ensure precise distance-based sorting
+  // Flatten the pages, no need for additional sorting since we're sorting by creation date
   const nearbyShopList = useMemo(() => {
-    const shops = nearbyShops?.pages?.flatMap((item) => item.data) || [];
-    
-    // Convert all distances to meters for consistent comparison
-    return shops.sort((a, b) => {
-      const distanceA = typeof a.distance === 'number' ? a.distance : Infinity;
-      const distanceB = typeof b.distance === 'number' ? b.distance : Infinity;
-      
-      // Convert to meters if in kilometers (assuming distances > 1 are in km)
-      const metersA = distanceA > 1 ? distanceA * 1000 : distanceA * 1000;
-      const metersB = distanceB > 1 ? distanceB * 1000 : distanceB * 1000;
-      
-      return metersA - metersB;
-    });
+    return nearbyShops?.pages?.flatMap((item) => item.data) || [];
   }, [nearbyShops?.pages]);
 
   const handleObserver = useCallback((entries: any) => {
@@ -230,12 +220,6 @@ export default function Homev4() {
     return rotateArrayInChunks(shops.data);
   }, [shops?.data]);
 
-  // Process top rated shops with rotation
-  const processedTopRatedShops = useMemo(() => {
-    if (!topRatedShops?.data) return [];
-    return rotateArrayInChunks(topRatedShops.data);
-  }, [topRatedShops?.data]);
-
   return (
     <div className={cls.container}>
       <div className={cls.wrapper}>
@@ -250,21 +234,21 @@ export default function Homev4() {
           {shops?.data && shops.data.length > 0 && (
             <ShopList 
               title={t("recommended")} 
-              shops={shops.data} 
+              shops={processedRecommendedShops} 
               loading={isShopLoading}
               link="/shop?filter=recommended" 
             />
           )}
+          {newShops?.data && newShops.data.length > 0 && (
+            <ShopList 
+              title={t("new.shops")} 
+              shops={newShops.data} 
+              loading={isNewShopsLoading}
+              link="/shop?filter=new" 
+            />
+          )}
           {ads?.data && ads.data.length > 0 && (
             <AdList data={ads.data} loading={adListLoading} />
-          )}
-          {topRatedShops?.data && topRatedShops.data.length > 0 && (
-            <ShopList
-              title={t("top.rated")}
-              shops={topRatedShops.data}
-              loading={isTopRatedLoading}
-              link="/shop?sort=desc&column=rating_avg"
-            />
           )}
           {Array.isArray(nearbyShopList) && nearbyShopList.length > 0 && (
             <ShopList

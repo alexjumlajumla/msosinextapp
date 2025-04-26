@@ -11,30 +11,49 @@ import {
   updateUserCart,
 } from "redux/slices/userCart";
 import useModal from "hooks/useModal";
-import CartReplaceModal from "components/clearCartModal/cartReplacePrompt";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import productService from "services/product";
-import ProductUI from "./productUI";
-import AddonsForm from "components/extrasForm/addonsForm";
 import { useTranslation } from "react-i18next";
 import { error, info } from "components/alert/toast";
 import { useRestaurant } from 'contexts/restaurant/restaurant.context';
+import useShopWorkingSchedule from "hooks/useShopWorkingSchedule";
 import { ShopWorkingDays } from 'interfaces';
+
+const CartReplaceModal = dynamic(() => import("components/clearCartModal/cartReplacePrompt"), {
+  ssr: false
+});
+const ProductUI = dynamic(() => import("./productUI"), {
+  ssr: false
+});
+const AddonsForm = dynamic(() => import("components/extrasForm/addonsForm"), {
+  ssr: false
+});
+
+type SuccessResponse<T> = {
+  data: T;
+  message: string;
+  status: boolean;
+  timestamp: string;
+};
 
 type Props = {
   handleClose: () => void;
   uuid: string;
+  initialData?: SuccessResponse<Product>;
 };
+
 type ShowExtrasType = {
   extras: Array<ProductExtra[]>;
   stock: Stock;
 };
+
 type SelectedAddon = {
   id: string;
   quantity: number;
 };
 
-export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
+export default function ProtectedProductSingle({ handleClose, uuid, initialData }: Props) {
   const { t } = useTranslation();
   const [counter, setCounter] = useState(1);
   const [extras, setExtras] = useState<any[]>([]);
@@ -56,14 +75,15 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
   const { query } = useRouter();
   const shopId = Number(query.id);
   const { restaurant } = useRestaurant();
+  const { isShopClosed } = useShopWorkingSchedule(restaurant);
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
 
   const { data } = useQuery(
     ["product", uuid, currency],
     () => productService.getById(uuid, { currency_id: currency?.id }),
     {
-      enabled: Boolean(uuid),
-      select: (data) => data.data,
+      enabled: Boolean(uuid) && Boolean(currency?.id),
+      initialData: initialData,
     }
   );
 
@@ -90,9 +110,9 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
     });
 
   useEffect(() => {
-    if (data) {
-      setCounter(data.min_qty || 1);
-      const myData = sortExtras(data);
+    if (data?.data) {
+      setCounter(data.data.min_qty || 1);
+      const myData = sortExtras(data.data);
       setExtras(myData.extras);
       setStock(myData.stock);
       setShowExtras(getExtras("", myData.extras, myData.stock));
@@ -148,15 +168,6 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
       error(t('shop.not.found'));
       return;
     }
-
-    if (!restaurant.shop_working_days?.length) {
-      error(t('shop.working.days.not.found'));
-      return;
-    }
-
-    const isShopClosed = restaurant.shop_working_days.find(
-      (item: ShopWorkingDays) => item.day === new Date().getDay().toString()
-    )?.disabled;
 
     if (isShopClosed) {
       error(t('shop.closed'));
@@ -264,7 +275,7 @@ export default function ProtectedProductSingle({ handleClose, uuid }: Props) {
   return (
     <div>
       <ProductUI
-        data={data || {}}
+        data={data?.data || {}}
         loading={!!data}
         stock={showExtras.stock}
         extras={showExtras.extras}
