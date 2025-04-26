@@ -87,17 +87,10 @@ export interface IShop {
   translation?: IShopTranslation;
   bonus?: any;
   rating_avg?: number;
-  delivery_time?: {
-    from: number;
-    to: number;
-    type: string;
-  };
+  delivery_time?: ShopDeliveryTime;
   distance?: number | string;
   products_count?: number;
-  location?: {
-    latitude: string | number;
-    longitude: string | number;
-  };
+  location?: Location;
   shop_closed_date?: ShopClosedDate[];
   shop_working_days?: ShopWorkingDays[];
   phone?: string;
@@ -136,7 +129,7 @@ export interface IBookingShop {
   reviews_count?: number;
   tags?: IShopTag[];
   open: boolean;
-  verify: Number;
+  verify: number;
 }
 
 export interface Bonus {
@@ -165,8 +158,8 @@ export interface ShopWorkingDays {
 }
 
 export interface Location {
-  latitude: string;
-  longitude: string;
+  latitude: string | number;
+  longitude: string | number;
 }
 
 export interface Category {
