@@ -38,7 +38,7 @@ export default function ShopCard({ data }: Props) {
           sizes="400px"
         />
         <ShopBadges data={data} />
-        <DistancePill distance={data.distance} />
+        <DistancePill distance={typeof data.distance === 'string' ? parseFloat(data.distance) : data.distance} />
       </div>
       <div className={cls.body}>
         <div className={cls.main}>
