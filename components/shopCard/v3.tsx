@@ -33,7 +33,7 @@ export default function ShopCard({ data }: Props) {
         />
         <ShopBadges data={data} />
         <ShopCardDeliveryInfo data={data.delivery_time} />
-        <DistancePill distance={data.distance} />
+        <DistancePill distance={typeof data.distance === 'string' ? parseFloat(data.distance) : data.distance} />
       </div>
       <div className={cls.body}>
         <h3 className={cls.title}>

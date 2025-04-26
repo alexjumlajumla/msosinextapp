@@ -4,8 +4,8 @@ import useLocale from "hooks/useLocale";
 import getShortTimeType from "utils/getShortTimeType";
 
 type ShopDeliveryTime = {
-  from: number;
-  to: number;
+  from: string | number;
+  to: string | number;
   type: string;
 };
 
@@ -18,10 +18,13 @@ export default function ShopCardDeliveryInfo({ data }: Props) {
 
   if (!data) return null;
 
+  const fromValue = typeof data.from === 'string' ? parseInt(data.from, 10) : data.from;
+  const toValue = typeof data.to === 'string' ? parseInt(data.to, 10) : data.to;
+
   return (
     <div className={cls.wrapper}>
       <span className={cls.text}>
-        {data.from}-{data.to} {t(getShortTimeType(data.type))}
+        {fromValue}-{toValue} {t(getShortTimeType(data.type))}
       </span>
     </div>
   );
