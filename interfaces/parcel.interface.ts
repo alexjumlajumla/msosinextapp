@@ -1,4 +1,4 @@
-import { Currency, ITransaction, Location, OrderReview, Translation } from "interfaces";
+import { Currency, ITransaction, StringLocation, OrderReview, Translation } from "interfaces";
 import { IUser } from "./user.interface";
 
 export interface Parcel {
@@ -28,9 +28,7 @@ export interface Parcel {
   review: OrderReview | null;
 }
 
-export interface ParcelAddress {
-  latitude: string;
-  longitude: string;
+export interface ParcelAddress extends StringLocation {
   address: string;
   house?: string;
   stage?: string;
@@ -68,14 +66,14 @@ export interface ParcelFormValues {
   phone_from: string;
   username_from: string;
   address_from: string;
-  location_from: Location;
+  location_from: StringLocation;
   house_from: string;
   stage_from: string;
   room_from: string;
   phone_to: string;
   username_to: string;
   address_to: string;
-  location_to: Location;
+  location_to: StringLocation;
   house_to: string;
   stage_to: string;
   room_to: string;
@@ -87,5 +85,5 @@ export interface ParcelFormValues {
   notify?: boolean;
   instructions: string;
   description: string;
-  qr_value: string
+  qr_value: string;
 }

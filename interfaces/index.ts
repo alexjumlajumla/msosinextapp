@@ -69,6 +69,26 @@ export interface IShopTranslation extends Translation {
   address?: string;
 }
 
+export interface Location {
+  latitude: string | number;
+  longitude: string | number;
+}
+
+export interface StringLocation {
+  latitude: string;
+  longitude: string;
+}
+
+export interface NumberLocation {
+  latitude: number;
+  longitude: number;
+}
+
+export interface MapLocation {
+  lat: number;
+  lng: number;
+}
+
 export interface IShop {
   id: number;
   uuid?: string;
@@ -155,11 +175,6 @@ export interface ShopWorkingDays {
   from: string;
   to: string;
   disabled?: boolean;
-}
-
-export interface Location {
-  latitude: string | number;
-  longitude: string | number;
 }
 
 export interface Category {

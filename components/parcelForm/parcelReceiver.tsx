@@ -20,6 +20,7 @@ import TextArea from "components/inputs/textArea";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useSettings } from "contexts/settings/settings.context";
 import { error } from "components/alert/toast";
+import { StringLocation } from "interfaces";
 
 type Props = {
   formik: FormikProps<ParcelFormValues>;
@@ -38,9 +39,9 @@ export default function ParcelReceiverForm({
   const [addressModal, handleOpenAddressModal, handleCloseAddressModal] = useModal();
   const {location} = useSettings();
 
-  const defaultLocation = {
-    latitude: location?.split(",")[0] || "0",
-    longitude: location?.split(",")[1] || "0",
+  const defaultLocation: StringLocation = {
+    latitude: String(location?.split(",")[0] || "0"),
+    longitude: String(location?.split(",")[1] || "0"),
   };
 
   // Extract values early to use in useQuery, with safe fallbacks
@@ -48,12 +49,23 @@ export default function ParcelReceiverForm({
   const location_from = formik?.values?.location_from || defaultLocation;
   const type_id = formik?.values?.type_id || '';
 
+  // Ensure locations are in string format for the API
+  const stringLocationFrom: StringLocation = {
+    latitude: String(location_from.latitude),
+    longitude: String(location_from.longitude),
+  };
+
+  const stringLocationTo: StringLocation = {
+    latitude: String(location_to.latitude),
+    longitude: String(location_to.longitude),
+  };
+
   const { data: price, isLoading, isError } = useQuery(
     ["calculateParcel", location_from, location_to, type_id, currency],
     () =>
       parcelService.calculate({
-        address_from: location_from,
-        address_to: location_to,
+        address_from: stringLocationFrom,
+        address_to: stringLocationTo,
         type_id,
         currency_id: currency?.id,
       }),
